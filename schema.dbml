@@ -15,8 +15,8 @@ Table moderators {
   is_admin bool [default: false, not null]
   is_active bool [default: true, not null]
 
-  created_at timestamp [default: `now()`]
-  updated_at timestamp [default: `now()`]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
 
   Note {
     'This table keeps a record of all mods for the api. A mod can be an admin.'
@@ -38,8 +38,8 @@ Table mod_country_preferences {
 Table categories {
   id int [pk, increment]
   name varchar [not null]
-  created_at timestamp [default: `now()`]
-  updated_at timestamp [default: `now()`]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
 
   Note {
     'This stores a list of all possible trivia categories'
@@ -49,8 +49,8 @@ Table categories {
 Table countries {
   id int [pk, increment] 
   name varchar [not null]
-  created_at timestamp [default: `now()`]
-  updated_at timestamp [default: `now()`]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
 
   Note {
     'This table holds all African countries'
@@ -73,13 +73,13 @@ enum difficulty_enum {
 Table submissions {
   id varchar [pk]
   question text [not null, unique]
-  status submission_status_enum [not null]
+  status submission_status_enum [not null, default: 'pending']
   moderator_id varchar [ref: > moderators.id, not null]
   difficulty difficulty_enum [not null] 
   submission_note text [null]
 
-  created_at timestamp [default: `now()`]
-  updated_at timestamp [default: `now()`]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
 
   Note {
     'This holds all questions from user submissions'
@@ -91,8 +91,8 @@ Table submission_options {
   submission_id varchar [ref: > submissions.id, not null]
   content text [not null]
   is_correct bool [default: false, not null]
-  created_at timestamp [default: `now()`]
-  updated_at timestamp [default: `now()`]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
 
     Note {
     'This holds all options from user submissions'
@@ -104,8 +104,8 @@ Table trivias {
   question text [not null]
   difficulty difficulty_enum [not null]
   submision_id varchar [ref: > submissions.id]
-  created_at timestamp [default: `now()`]
-  updated_at timestamp [default: `now()`]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
 
   Note {
     'This table holds all questions in the trivia db'
@@ -113,13 +113,13 @@ Table trivias {
 }
 
 
-Table options {
+Table trivia_options {
   id varchar [pk, not null]
   trivia_id varchar [ref: > trivias.id, not null]
   content text [not null]
   is_correct bool [default: false, not null]
-  created_at timestamp [default: `now()`]
-  updated_at timestamp [default: `now()`]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
 
   Note {
     'This table holds all options in the trivia db'
