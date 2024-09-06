@@ -7,6 +7,7 @@ from api.v1.models.base_model import BaseTableModel
 class Moderator(BaseTableModel):
     __tablename__ = 'moderators'
 
+    avatar_url = Column(String, nullable=True)
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
     username = Column(String, unique=True, nullable=False)

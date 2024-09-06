@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2024-09-04T00:06:33.600Z
+-- Generated at: 2024-09-06T11:49:26.205Z
 
 CREATE TYPE "submission_status_enum" AS ENUM (
   'pending',
@@ -16,6 +16,7 @@ CREATE TYPE "difficulty_enum" AS ENUM (
 
 CREATE TABLE "moderators" (
   "id" varchar PRIMARY KEY,
+  "avatar_url" varchar,
   "first_name" varchar NOT NULL,
   "last_name" varchar NOT NULL,
   "username" varchar UNIQUE NOT NULL,
