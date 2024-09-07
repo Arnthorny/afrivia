@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field, EmailStr
 from datetime import datetime
+from api.v1.schemas.african_countries_enum import AfricanCountriesEnum as ACE
 
 
 class ModeratorBaseSchema(BaseModel):
@@ -7,7 +8,7 @@ class ModeratorBaseSchema(BaseModel):
     last_name: str = Field(min_length=1)
     username: str = Field(min_length=1)
     email: EmailStr
-    country_preferences: None | list[str] = Field(min_length=1, default=[])
+    country_preferences: None | list[ACE] = Field(min_length=1, default=[])
 
 class CreateModeratorSchema(ModeratorBaseSchema):
     password: str = Field(min_length=1)
@@ -27,7 +28,7 @@ class UpdateModeratorSchema(BaseModel):
     last_name: str  | None = None
     username: str  | None = None
     password: str  | None = None
-    country_preferences: None | list[str] = Field(min_length=1, default=[])
+    country_preferences: None | list[ACE] = Field(min_length=1, default=[])
 
 
 class UpdateModeratorByAdminSchema(UpdateModeratorSchema):

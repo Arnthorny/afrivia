@@ -1,17 +1,14 @@
-from typing import Optional, Annotated
+from typing import Optional
 import datetime as dt
-from fastapi import status, Request
+from fastapi import status
 from pydantic import EmailStr
 
-from fastapi.responses import StreamingResponse
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import desc, or_
 from sqlalchemy.exc import IntegrityError
 from passlib.context import CryptContext
-from datetime import datetime, timedelta, timezone
 
 from api.db.database import get_db
 from api.utils.settings import settings
@@ -29,8 +26,6 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class ModeratorService(Service):
     """Moderator service"""
-
-
     DUP_EXC = HTTPException(
                 status_code=400,
                 detail="Moderator with this email or username already exists",
@@ -127,7 +122,7 @@ class ModeratorService(Service):
         Returns:
             Moderator: updated moderator object
         """
-        if not current_mod.is_admin and id_target != current_mod.id:
+        if id_target != current_mod.id:
             raise self.FORBIDDEN_EXC
         
         mod = self.fetch(db=db, id=id_target)
@@ -164,7 +159,7 @@ class ModeratorService(Service):
             Moderator: _description_
         """
 
-        if not current_mod.is_admin and id_target != current_mod.id:
+        if current_mod.is_admin is not True and id_target != current_mod.id:
             raise self.FORBIDDEN_EXC
         
         mod = self.fetch(db=db, id=id_target)
@@ -177,6 +172,37 @@ class ModeratorService(Service):
         db.refresh(mod)
 
         return mod
+    
+    def delete(self, db: Session, id_target: str,
+                             current_admin: Moderator) -> bool:
+        """Function to delete a mod account. Only an admin has permission.
+
+        Args:
+            db (Session): 
+            id_target (str): Id of the target moderator
+            currrent_admin (Moderator): Admin doing the deletion
+
+        Raises:
+            self.FORBIDDEN_EXC: Raised if mod is not admin or target mod
+            self.NOT_FOUND_EXC: Raised if mod id_target is invalid
+
+        Returns:
+            Moderator: _description_
+        """
+
+        if current_admin.is_admin is not True:
+            raise self.FORBIDDEN_EXC
+        
+        mod = self.fetch(db=db, id=id_target)
+
+        if not mod:
+            raise self.NOT_FOUND_EXC
+
+        db.delete(mod)
+        db.commit()
+
+        return True
+
 
     def authenticate_mod(self, db: Session, email: EmailStr, password: str):
         """Function to authenticate a moderator"""
@@ -236,7 +262,7 @@ class ModeratorService(Service):
                 raise credentials_exception
 
             if token_type != "access":
-                raise HTTPException(detail="Only access token allowed", status_code=400)
+                raise HTTPException(detail="Only access token allowed", status_code=401)
 
             return mod_id
 
@@ -261,7 +287,7 @@ class ModeratorService(Service):
                 raise credentials_exception
 
             if token_type != "refresh":
-                raise HTTPException(detail="Only refresh token allowed", status_code=400)
+                raise HTTPException(detail="Only refresh token allowed", status_code=401)
 
             return mod_id
 
@@ -375,12 +401,12 @@ class ModeratorService(Service):
             "confirmNewPassword": confirm_new_password,
         }
 
-    def get_current_super_admin(
+    def get_current_admin(
         self, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
     ):
         """Get the current super admin"""
         mod = self.get_current_mod(db=db, access_token=token)
-        if not mod.is_admin:
+        if mod.is_admin is not True:
             raise HTTPException(
                 status_code=403,
                 detail="You do not have permission to access this resource",
