@@ -1,6 +1,7 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
 -- Generated at: 2024-09-06T11:49:26.205Z
+-- Run as admin
 
 CREATE TYPE "submission_status_enum" AS ENUM (
   'pending',
@@ -153,3 +154,5 @@ ALTER TABLE "categories_submissions" ADD FOREIGN KEY ("submission_id") REFERENCE
 ALTER TABLE "countries_submissions" ADD FOREIGN KEY ("country_id") REFERENCES "countries" ("id");
 
 ALTER TABLE "countries_submissions" ADD FOREIGN KEY ("submission_id") REFERENCES "submissions" ("id");
+
+CREATE EXTENSION pg_trgm;
