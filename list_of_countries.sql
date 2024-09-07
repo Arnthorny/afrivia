@@ -33,15 +33,12 @@ INSERT INTO countries(name) VALUES
 ,('Mali')
 ,('Mauritania')
 ,('Mauritius')
-,('Mayotte')
 ,('Morocco')
 ,('Mozambique')
 ,('Namibia')
 ,('Niger')
 ,('Nigeria')
 ,('Rwanda')
-,('Réunion')
-,('Saint Helena')
 ,('Sao Tome & Principe')
 ,('Senegal')
 ,('Seychelles')
@@ -54,7 +51,6 @@ INSERT INTO countries(name) VALUES
 ,('Togo')
 ,('Tunisia')
 ,('Uganda')
-,('Western Sahara')
 ,('Zambia')
 ,('Zimbabwe');
 
