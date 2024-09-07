@@ -1,13 +1,13 @@
 from api.core.base.services import Service
 from api.v1.models.country import Country
 from sqlalchemy import or_
-
+from api.v1.schemas.african_countries_enum import AfricanCountriesEnum as ACE
 
 
 
 class CountryService(Service):
     @staticmethod
-    def fetch_countries(db, list_of_countries: list) -> list[Country]:
+    def fetch_countries(db, list_of_countries: list[ACE]) -> list[Country]:
         """This function retrieves country models 
 
         Args:
