@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str = config("SECRET_KEY")
     ALGORITHM: str = config("ALGORITHM")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = config("ACCESS_TOKEN_EXPIRE_MINUTES")
-    JWT_REFRESH_EXPIRY: int = config("JWT_REFRESH_EXPIRY")
+    JWT_REFRESH_EXPIRY: int = config("JWT_REFRESH_EXPIRY_DAYS")
 
     APP_URL: str = config("APP_URL")
 

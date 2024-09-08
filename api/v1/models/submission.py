@@ -7,18 +7,8 @@ import enum
 from sqlalchemy.orm import relationship
 from api.v1.models.association import category_submission_association, country_submission_association
 from api.v1.models.base_model import BaseTableModel
-
-
-
-class SubmissionStatusEnum(str, enum.Enum):
-    pending = 'pending'
-    approved = 'approved'
-    rejected = 'rejected'
-
-class DifficultyEnum(str, enum.Enum):
-    easy = 'easy'
-    medium = 'medium'
-    hard = 'hard'
+from api.v1.schemas.submission import DifficultyEnum
+from api.v1.schemas.submission import SubmissionStatusEnum
 
 
 
@@ -41,6 +31,29 @@ class Submission(BaseTableModel):
     countries = relationship(
         "Country", secondary=country_submission_association, back_populates="submissions"
     )
+
+    def to_dict(self) -> dict:
+        """returns a dictionary representation of the submission"""
+        obj_dict = self.__dict__.copy()
+        del obj_dict["_sa_instance_state"]
+        obj_dict["id"] = self.id
+        
+        # For now it's a one-to-one mapping for question and categories
+        obj_dict['category'] = self.categories[0].name
+        obj_dict['countries'] = list(map(lambda x: x.name, self.countries))
+
+        
+        obj_dict['correct_option'] = ''
+        obj_dict['incorrect_options'] = []
+        all_option_objects: list[SubmissionOption] = self.options
+
+        for option_obj in all_option_objects:
+            if option_obj.is_correct is True:
+                obj_dict['correct_option'] = option_obj.content
+            else:
+                obj_dict['incorrect_options'].append(option_obj.content)
+
+        return obj_dict
 
 class SubmissionOption(BaseTableModel):
     __tablename__ = 'submission_options'

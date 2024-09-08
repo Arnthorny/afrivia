@@ -21,7 +21,7 @@ class CountryService(Service):
         conditions = []
 
         for c_name in list_of_countries:
-            conditions.append(Country.name == c_name)
+            conditions.append(Country.name == c_name.value)
 
         all_country_models = db.query(Country).filter(or_(*conditions)).all()
 
