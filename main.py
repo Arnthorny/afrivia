@@ -79,7 +79,7 @@ async def exception(request: Request, exc: Exception):
         content={
             "success": False,
             "status_code": 500,
-            "message": f"An unexpected error occurred: {exc}",
+            "message": f"An unexpected error occurred. Check the logs.",
         },
     )
 

@@ -13,7 +13,7 @@ submissions = APIRouter(prefix='/submissions', tags=['Submissions'])
 @submissions.post("",
                   response_model=PostSubmissionResponseModelSchema,
                   status_code=201)
-async def create_faq(
+async def create_submission(
     schema: CreateSubmissionSchema,
     db: Session = Depends(get_db)
     ):
@@ -28,7 +28,7 @@ async def create_faq(
     submission = submission_service.create(db, schema=schema)
     s_dict = submission.to_dict()
     
-    logger.info(f'Creating new submission. ID: {submission.id}.')
+    logger.info(f'Created new submission. ID: {submission.id}.')
     return success_response(
         data=jsonable_encoder(PostSubmissionResponseSchema.model_validate(s_dict)),
         message="Successfully added submission",

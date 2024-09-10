@@ -41,7 +41,7 @@ class SubmissionBaseSchema(BaseModel):
 
 class CreateSubmissionSchema(SubmissionBaseSchema):
     category: CategoryEnum
-    countries: list[ACE] = Field(min_length=1, default=[])
+    countries: list[ACE] = Field(default=[])
 
 
 
@@ -51,7 +51,7 @@ class PostSubmissionResponseSchema(SubmissionBaseSchema):
     moderator_id: str
     updated_at: datetime
     category: CategoryEnum
-    countries: list[ACE] = Field(min_length=1, default=[])
+    countries: list[ACE] = Field(default=[])
 
 class PostSubmissionResponseModelSchema (PostSubmissionResponseSchema, BaseSuccessResponseSchema):
     pass
