@@ -54,7 +54,5 @@ class PostSubmissionResponseSchema(SubmissionBaseSchema):
     countries: list[ACE] = Field(default=[])
 
 
-class PostSubmissionResponseModelSchema(
-    PostSubmissionResponseSchema, BaseSuccessResponseSchema
-):
-    pass
+class PostSubmissionResponseModelSchema(BaseSuccessResponseSchema):
+    data: PostSubmissionResponseSchema
