@@ -10,6 +10,7 @@ from api.v1.services.submission import submission_service
 from api.utils.logger import logger
 
 submissions = APIRouter(prefix='/submissions', tags=['Submissions'])
+
 @submissions.post("",
                   response_model=PostSubmissionResponseModelSchema,
                   status_code=201)

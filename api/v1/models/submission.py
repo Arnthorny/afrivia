@@ -35,7 +35,7 @@ class Submission(BaseTableModel):
     def to_dict(self) -> dict:
         """returns a dictionary representation of the submission"""
         obj_dict = self.__dict__.copy()
-        del obj_dict["_sa_instance_state"]
+        obj_dict.pop("_sa_instance_state", None)
         obj_dict["id"] = self.id
         
         # For now it's a one-to-one mapping for question and categories

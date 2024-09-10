@@ -328,7 +328,6 @@ class TestModeratorService:
 
         
         db.get.return_value = mod
-        # mocker.patch.object(moderator_service, "fetch", return_value=)
 
         # Act
         result = mod_service.get_current_mod(access_token=token, db=db)
