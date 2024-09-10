@@ -4,31 +4,32 @@ from api.v1.schemas.african_countries_enum import AfricanCountriesEnum as ACE
 from api.v1.schemas.base_schemas import BaseSuccessResponseSchema
 from enum import Enum
 
+
 class DifficultyEnum(str, Enum):
-    easy = 'easy'
-    medium = 'medium'
-    hard = 'hard'
+    easy = "easy"
+    medium = "medium"
+    hard = "hard"
+
 
 class SubmissionStatusEnum(str, Enum):
-    pending = 'pending'
-    approved = 'approved'
-    rejected = 'rejected'
+    pending = "pending"
+    approved = "approved"
+    rejected = "rejected"
 
 
 class CategoryEnum(str, Enum):
-    entertainment = 'Entertainment'
-    sports = 'Sports'
-    general_knowledge = 'General Knowledge'
-    science = 'Science'
-    mythology = 'Mythology'
-    geography = 'Geography'
-    history = 'History'
-    politics = 'Politics'
-    art = 'Art'
-    celebrity = 'Celebrities'
-    animals = 'Animals'
-    folklore = 'Folklore'
-
+    entertainment = "Entertainment"
+    sports = "Sports"
+    general_knowledge = "General Knowledge"
+    science = "Science"
+    mythology = "Mythology"
+    geography = "Geography"
+    history = "History"
+    politics = "Politics"
+    art = "Art"
+    celebrity = "Celebrities"
+    animals = "Animals"
+    folklore = "Folklore"
 
 
 class SubmissionBaseSchema(BaseModel):
@@ -44,7 +45,6 @@ class CreateSubmissionSchema(SubmissionBaseSchema):
     countries: list[ACE] = Field(default=[])
 
 
-
 class PostSubmissionResponseSchema(SubmissionBaseSchema):
     id: str
     status: str
@@ -53,6 +53,8 @@ class PostSubmissionResponseSchema(SubmissionBaseSchema):
     category: CategoryEnum
     countries: list[ACE] = Field(default=[])
 
-class PostSubmissionResponseModelSchema (PostSubmissionResponseSchema, BaseSuccessResponseSchema):
-    pass
 
+class PostSubmissionResponseModelSchema(
+    PostSubmissionResponseSchema, BaseSuccessResponseSchema
+):
+    pass

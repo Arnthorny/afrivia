@@ -7,6 +7,7 @@ from api.v1.services.moderator import mod_service
 from unittest.mock import Mock
 import jwt
 from api.v1.services.moderator import settings
+from fastapi.security import HTTPAuthorizationCredentials
 
 import pytest
 
@@ -312,7 +313,8 @@ class TestModeratorService:
 
         # Act & Assert
         with pytest.raises(HTTPException) as exc:
-            mod_service.get_current_mod(access_token="invalid_token", db=db)
+            creds = HTTPAuthorizationCredentials(scheme='bearer', credentials="invalid_token")
+            mod_service.get_current_mod(credentials=creds, db=db)
             assert exc.value.detail == 'Could not validate credentials'
 
     # # Fetching the current logged-in moderator using a valid access token
@@ -330,7 +332,8 @@ class TestModeratorService:
         db.get.return_value = mod
 
         # Act
-        result = mod_service.get_current_mod(access_token=token, db=db)
+        creds = HTTPAuthorizationCredentials(scheme='bearer', credentials=token)
+        result = mod_service.get_current_mod(credentials=creds, db=db)
 
         # Assert
         assert result.first_name == "John"
