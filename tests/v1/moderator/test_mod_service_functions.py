@@ -7,6 +7,7 @@ from api.v1.services.moderator import mod_service
 from unittest.mock import Mock
 import jwt
 from api.v1.services.moderator import settings
+from fastapi.security import HTTPAuthorizationCredentials
 
 import pytest
 
@@ -233,14 +234,10 @@ class TestModeratorService:
         confirm_new_password = "new_password"
 
 
+        mod_service.change_password(old_password, new_password, confirm_new_password, user, db)
 
-        # mocker.patch.object(mod_service, 'verify_password', return_value=True)
-        # mocker.patch.object(mod_service, 'hash_password', return_value="hashed_new_password")
-
-        result = mod_service.change_password(old_password, new_password, confirm_new_password, user, db)
-
-        assert result["oldPassword"] == old_password
-        assert result["confirmNewPassword"] == confirm_new_password
+        assert mod_service.verify_password("new_password", user.password) is\
+            True
 
 
     
@@ -312,7 +309,8 @@ class TestModeratorService:
 
         # Act & Assert
         with pytest.raises(HTTPException) as exc:
-            mod_service.get_current_mod(access_token="invalid_token", db=db)
+            creds = HTTPAuthorizationCredentials(scheme='bearer', credentials="invalid_token")
+            mod_service.get_current_mod(credentials=creds, db=db)
             assert exc.value.detail == 'Could not validate credentials'
 
     # # Fetching the current logged-in moderator using a valid access token
@@ -330,7 +328,8 @@ class TestModeratorService:
         db.get.return_value = mod
 
         # Act
-        result = mod_service.get_current_mod(access_token=token, db=db)
+        creds = HTTPAuthorizationCredentials(scheme='bearer', credentials=token)
+        result = mod_service.get_current_mod(credentials=creds, db=db)
 
         # Assert
         assert result.first_name == "John"

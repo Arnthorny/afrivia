@@ -1,9 +1,12 @@
-from typing import Optional
+from typing import Optional, Annotated
 import datetime as dt
 from fastapi import status
 from pydantic import EmailStr
 
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import (
+    HTTPBearer,
+    HTTPAuthorizationCredentials,
+)
 import jwt
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -17,35 +20,31 @@ from api.v1.models.moderator import Moderator
 from api.v1.services.country import CountryService
 from api.v1.schemas import moderator
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
-oauth2_scheme_optional = OAuth2PasswordBearer(
-    tokenUrl="/api/v1/auth/login", auto_error=False
-)
+bearer_scheme = HTTPBearer(auto_error=False)
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class ModeratorService(Service):
     """Moderator service"""
+
     DUP_EXC = HTTPException(
-                status_code=400,
-                detail="Moderator with this email or username already exists",
-        )
+        status_code=400,
+        detail="Moderator with this email or username already exists",
+    )
 
     FORBIDDEN_EXC = HTTPException(
-                status_code=403,
-                detail="You do not have permission to access this resource",
-        )
+        status_code=403,
+        detail="You do not have permission to access this resource",
+    )
 
     NOT_FOUND_EXC = HTTPException(
-                status_code=404,
-                detail="Moderator not found",
-        )
-        
+        status_code=404,
+        detail="Moderator not found",
+    )
 
     def fetch_all():
         pass
-
-
 
     def fetch(self, db: Session, id: str):
         """Fetches a moderator by their id"""
@@ -58,9 +57,13 @@ class ModeratorService(Service):
 
         mod = db.query(Moderator).filter(Moderator.email == email).first()
         return mod
-    
 
-    def create(self, db: Session, schema: moderator.CreateModeratorSchema, is_admin: bool=False) -> Moderator:
+    def create(
+        self,
+        db: Session,
+        schema: moderator.CreateModeratorSchema,
+        is_admin: bool = False,
+    ) -> Moderator:
         """Creates a new moderator
 
 
@@ -81,7 +84,7 @@ class ModeratorService(Service):
 
         try:
             schema_dump = schema.model_dump()
-            countries_pref = schema_dump.pop('country_preferences', [])
+            countries_pref = schema_dump.pop("country_preferences", [])
             country_models_list = CountryService.fetch_countries(db, countries_pref)
 
             mod = Moderator(**schema_dump)
@@ -95,23 +98,19 @@ class ModeratorService(Service):
         except IntegrityError as e:
             raise self.DUP_EXC
         return mod
-    
-        # user_schema = user.UserData.model_validate(new_user, from_attributes=True)
-        #     return user.AdminCreateUserResponse(
-        #         message="User created successfully",
-        #         status_code=201,
-        #         status="success",
-        #         data=user_schema,
-        #     )
 
-    
-
-    def update(self, db: Session, current_mod: Moderator, schema: moderator.UpdateModeratorSchema, id_target: str):
+    def update(
+        self,
+        db: Session,
+        current_mod: Moderator,
+        schema: moderator.UpdateModeratorSchema,
+        id_target: str,
+    ):
         """Update the moderator specified by id_target. Only an admin or
         the moderator should be allowed to make these changes
 
         Args:
-            db (Session): 
+            db (Session):
             current_mod (Moderator): Logged-in moderator as determined from access_token
             schema (moderator.UpdateModeratorSchema): Pydantic schema for updating model
             id_target (str): Target mod  idto be updated
@@ -124,14 +123,14 @@ class ModeratorService(Service):
         """
         if id_target != current_mod.id:
             raise self.FORBIDDEN_EXC
-        
+
         mod = self.fetch(db=db, id=id_target)
 
         if not mod:
             raise self.NOT_FOUND_EXC
 
         update_data = schema.model_dump(exclude_unset=True)
-        countries_pref = update_data.pop('country_preferences', [])
+        countries_pref = update_data.pop("country_preferences", [])
         country_models = CountryService.fetch_countries(db, countries_pref)
 
         for key, value in update_data.items():
@@ -142,12 +141,17 @@ class ModeratorService(Service):
         db.refresh(mod)
         return mod
 
-    def deactivateOrActivate(self, db: Session, id_target: str,
-                             current_mod: Moderator, is_active: bool =False) -> Moderator:
+    def deactivateOrActivate(
+        self,
+        db: Session,
+        id_target: str,
+        current_mod: Moderator,
+        is_active: bool = False,
+    ) -> Moderator:
         """Function to deactivate or reactivate a mod. Only an admin or the target mod has permission.
 
         Args:
-            db (Session): 
+            db (Session):
             id_target (str): Id of the target moderator
             currrent_mod (Moderator): Moderator doing the deactivation
 
@@ -161,7 +165,7 @@ class ModeratorService(Service):
 
         if current_mod.is_admin is not True and id_target != current_mod.id:
             raise self.FORBIDDEN_EXC
-        
+
         mod = self.fetch(db=db, id=id_target)
 
         if not mod:
@@ -172,13 +176,12 @@ class ModeratorService(Service):
         db.refresh(mod)
 
         return mod
-    
-    def delete(self, db: Session, id_target: str,
-                             current_admin: Moderator) -> bool:
+
+    def delete(self, db: Session, id_target: str, current_admin: Moderator) -> bool:
         """Function to delete a mod account. Only an admin has permission.
 
         Args:
-            db (Session): 
+            db (Session):
             id_target (str): Id of the target moderator
             currrent_admin (Moderator): Admin doing the deletion
 
@@ -192,7 +195,7 @@ class ModeratorService(Service):
 
         if current_admin.is_admin is not True:
             raise self.FORBIDDEN_EXC
-        
+
         mod = self.fetch(db=db, id=id_target)
 
         if not mod:
@@ -203,11 +206,10 @@ class ModeratorService(Service):
 
         return True
 
-
     def authenticate_mod(self, db: Session, email: EmailStr, password: str):
         """Function to authenticate a moderator"""
 
-        mod = self.fetch_by_email(db, email=email) 
+        mod = self.fetch_by_email(db, email=email)
 
         if not mod:
             raise HTTPException(status_code=400, detail="Invalid user credentials")
@@ -248,7 +250,9 @@ class ModeratorService(Service):
         encoded_jwt = jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
         return encoded_jwt
 
-    def verify_access_token(self, access_token: str, credentials_exception: HTTPException):
+    def verify_access_token(
+        self, access_token: str, credentials_exception: HTTPException
+    ):
         """Funtcion to decode and verify access token"""
 
         try:
@@ -267,13 +271,13 @@ class ModeratorService(Service):
             return mod_id
 
         except jwt.exceptions.ExpiredSignatureError:
-            raise HTTPException(
-            status_code=401, detail="Access token expired"
-        )    
+            raise HTTPException(status_code=401, detail="Access token expired")
         except jwt.exceptions.InvalidTokenError:
             raise credentials_exception
 
-    def verify_refresh_token(self, refresh_token: str, credentials_exception: HTTPException):
+    def verify_refresh_token(
+        self, refresh_token: str, credentials_exception: HTTPException
+    ):
         """Funtcion to decode and verify refresh token"""
 
         try:
@@ -287,25 +291,27 @@ class ModeratorService(Service):
                 raise credentials_exception
 
             if token_type != "refresh":
-                raise HTTPException(detail="Only refresh token allowed", status_code=401)
+                raise HTTPException(
+                    detail="Only refresh token allowed", status_code=401
+                )
 
             return mod_id
 
         except jwt.exceptions.ExpiredSignatureError:
-            raise HTTPException(
-            status_code=401, detail="Refresh token expired"
-        )    
+            raise HTTPException(status_code=401, detail="Refresh token expired")
         except jwt.exceptions.InvalidTokenError:
             raise credentials_exception
 
-
-    def refresh_access_token(self, current_refresh_token: str):
+    def refresh_access_token(self, current_refresh_token: str | None):
         """Function to generate new access token and rotate refresh token"""
-        
+
         credentials_exception = HTTPException(
             status_code=401,
             detail="Could not validate refresh token",
         )
+
+        if current_refresh_token is None:
+            raise credentials_exception
 
         mod_id = self.verify_refresh_token(current_refresh_token, credentials_exception)
 
@@ -329,7 +335,9 @@ class ModeratorService(Service):
         return mod
 
     def get_current_mod(
-        self, access_token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+        self,
+        credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)],
+        db: Session = Depends(get_db),
     ) -> Moderator:
         """Function to get current logged in mod"""
 
@@ -339,21 +347,22 @@ class ModeratorService(Service):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-        mod_id = self.verify_access_token(access_token, credentials_exception)
+        mod_id = self.verify_access_token(
+            credentials.credentials, credentials_exception
+        )
         mod = self.fetch(db, mod_id)
         if not mod:
             raise credentials_exception
         return mod
 
-
     def get_current_mod_optional(
         self,
-        access_token: Optional[str] = Depends(oauth2_scheme_optional),
+        credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)],
         db: Session = Depends(get_db),
     ) -> Optional[Moderator]:
-        """Used to optionally check for a user. This will be used for tracking unauthenticated users"""
+        """Used to optionally check for a mod."""
 
-        if access_token is None:
+        if credentials is None:
             return None
 
         credentials_exception = HTTPException(
@@ -362,12 +371,14 @@ class ModeratorService(Service):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-        mod_id = self.verify_access_token(access_token, credentials_exception)
+        mod_id = self.verify_access_token(
+            credentials.credentials, credentials_exception
+        )
         mod = self.fetch(db, mod_id)
         if not mod:
             raise credentials_exception
         return mod
-    
+
     def change_password(
         self,
         old_password: str,
@@ -394,18 +405,13 @@ class ModeratorService(Service):
         user.password = self.hash_password(new_password)
         db.commit()
 
-        # Return the passwords in the specified format
-        return {
-            "oldPassword": old_password,
-            "newPassword": user.password,
-            "confirmNewPassword": confirm_new_password,
-        }
-
     def get_current_admin(
-        self, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
+        self,
+        credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)],
+        db: Session = Depends(get_db),
     ):
         """Get the current super admin"""
-        mod = self.get_current_mod(db=db, access_token=token)
+        mod = self.get_current_mod(db=db, credentials=credentials)
         if mod.is_admin is not True:
             raise HTTPException(
                 status_code=403,
@@ -413,7 +419,6 @@ class ModeratorService(Service):
             )
         return mod
 
-    
     def get_fullname(self, mod):
         return f"{mod.first_name} {mod.last_name}"
 
