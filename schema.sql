@@ -1,9 +1,9 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2024-09-06T11:49:26.205Z
--- Run as admin
+-- Generated at: 2024-09-12T10:11:50.448Z
 
 CREATE TYPE "submission_status_enum" AS ENUM (
+  'awaiting',
   'pending',
   'approved',
   'rejected'
@@ -53,7 +53,7 @@ CREATE TABLE "submissions" (
   "id" varchar PRIMARY KEY,
   "question" text UNIQUE NOT NULL,
   "status" submission_status_enum NOT NULL DEFAULT 'pending',
-  "moderator_id" varchar NOT NULL,
+  "moderator_id" varchar,
   "difficulty" difficulty_enum NOT NULL,
   "submission_note" text,
   "created_at" timestamptz DEFAULT (now()),
@@ -127,32 +127,30 @@ COMMENT ON TABLE "trivias" IS 'This table holds all questions in the trivia db';
 
 COMMENT ON TABLE "trivia_options" IS 'This table holds all options in the trivia db';
 
-ALTER TABLE "mod_country_preferences" ADD FOREIGN KEY ("moderator_id") REFERENCES "moderators" ("id");
-
 ALTER TABLE "mod_country_preferences" ADD FOREIGN KEY ("country_id") REFERENCES "countries" ("id");
+
+ALTER TABLE "mod_country_preferences" ADD FOREIGN KEY ("moderator_id") REFERENCES "moderators" ("id") ON DELETE CASCADE;
 
 ALTER TABLE "submissions" ADD FOREIGN KEY ("moderator_id") REFERENCES "moderators" ("id");
 
-ALTER TABLE "submission_options" ADD FOREIGN KEY ("submission_id") REFERENCES "submissions" ("id");
+ALTER TABLE "submission_options" ADD FOREIGN KEY ("submission_id") REFERENCES "submissions" ("id") ON DELETE CASCADE;
 
 ALTER TABLE "trivias" ADD FOREIGN KEY ("submission_id") REFERENCES "submissions" ("id");
 
-ALTER TABLE "trivia_options" ADD FOREIGN KEY ("trivia_id") REFERENCES "trivias" ("id");
+ALTER TABLE "trivia_options" ADD FOREIGN KEY ("trivia_id") REFERENCES "trivias" ("id") ON DELETE CASCADE;
 
 ALTER TABLE "categories_trivias" ADD FOREIGN KEY ("category_id") REFERENCES "categories" ("id");
 
-ALTER TABLE "categories_trivias" ADD FOREIGN KEY ("trivia_id") REFERENCES "trivias" ("id");
+ALTER TABLE "categories_trivias" ADD FOREIGN KEY ("trivia_id") REFERENCES "trivias" ("id") ON DELETE CASCADE;
 
 ALTER TABLE "countries_trivias" ADD FOREIGN KEY ("country_id") REFERENCES "countries" ("id");
 
-ALTER TABLE "countries_trivias" ADD FOREIGN KEY ("trivia_id") REFERENCES "trivias" ("id");
+ALTER TABLE "countries_trivias" ADD FOREIGN KEY ("trivia_id") REFERENCES "trivias" ("id") ON DELETE CASCADE;
 
 ALTER TABLE "categories_submissions" ADD FOREIGN KEY ("category_id") REFERENCES "categories" ("id");
 
-ALTER TABLE "categories_submissions" ADD FOREIGN KEY ("submission_id") REFERENCES "submissions" ("id");
+ALTER TABLE "categories_submissions" ADD FOREIGN KEY ("submission_id") REFERENCES "submissions" ("id") ON DELETE CASCADE;
 
 ALTER TABLE "countries_submissions" ADD FOREIGN KEY ("country_id") REFERENCES "countries" ("id");
 
-ALTER TABLE "countries_submissions" ADD FOREIGN KEY ("submission_id") REFERENCES "submissions" ("id");
-
-CREATE EXTENSION pg_trgm;
+ALTER TABLE "countries_submissions" ADD FOREIGN KEY ("submission_id") REFERENCES "submissions" ("id") ON DELETE CASCADE;

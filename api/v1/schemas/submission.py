@@ -12,6 +12,7 @@ class DifficultyEnum(str, Enum):
 
 
 class SubmissionStatusEnum(str, Enum):
+    awaiting = "awaiting"
     pending = "pending"
     approved = "approved"
     rejected = "rejected"
