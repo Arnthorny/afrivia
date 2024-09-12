@@ -46,13 +46,30 @@ class CreateSubmissionSchema(SubmissionBaseSchema):
     countries: list[ACE] = Field(default=[])
 
 
-class PostSubmissionResponseSchema(SubmissionBaseSchema):
+class HelperResponseSchemaOne(CreateSubmissionSchema):
     id: str
     status: str
+    created_at: datetime
+
+
+class PostSubmissionResponseSchema(HelperResponseSchemaOne, SubmissionBaseSchema):
     moderator_id: str
-    updated_at: datetime
-    category: CategoryEnum
-    countries: list[ACE] = Field(default=[])
+
+
+class RetrieveSubmissionForModSchema(HelperResponseSchemaOne, SubmissionBaseSchema):
+    pass
+
+
+class PaginatedBaseSchema(BaseModel):
+    page: int
+    total_pages: int
+    total: int
+    limit: int
+    items: list[RetrieveSubmissionForModSchema]
+
+
+class PaginatedResponseModelSchema(BaseSuccessResponseSchema):
+    data: PaginatedBaseSchema
 
 
 class PostSubmissionResponseModelSchema(BaseSuccessResponseSchema):
