@@ -10,6 +10,10 @@ class ModeratorLoginSchema(BaseModel):
     password: str = Field(min_length=6)
 
 
+class ModeratorLogoutResponse(BaseSuccessResponseSchema):
+    pass
+
+
 class ModeratorBaseSchema(BaseModel):
     email: EmailStr
     first_name: str = Annotated[
@@ -21,7 +25,7 @@ class ModeratorBaseSchema(BaseModel):
     username: str = Annotated[
         str, StringConstraints(min_length=2, max_length=30, strip_whitespace=True)
     ]
-    country_preferences: None | list[ACE] = Field(min_length=1, default=[])
+    country_preferences: list[ACE] = Field(default=[])
 
 
 class CreateModeratorSchema(ModeratorBaseSchema):
@@ -32,7 +36,7 @@ class CreateModeratorSchema(ModeratorBaseSchema):
 
 class CreateModeratorResponseSchema(ModeratorBaseSchema):
     id: str
-    updated_at: datetime
+    created_at: datetime
     is_admin: bool
     is_active: bool
 
@@ -40,18 +44,41 @@ class CreateModeratorResponseSchema(ModeratorBaseSchema):
         from_attributes = True
 
 
+class DataModeratorResponseSchema(BaseModel):
+    data: CreateModeratorResponseSchema
+
+
 class CreateModeratorResponseModelSchema(
-    BaseSuccessResponseSchema, CreateModeratorResponseSchema
+    BaseSuccessResponseSchema, DataModeratorResponseSchema
+):
+    access_token: str
+    refresh_token: str
+
+
+class GetModeratorResponseModelSchema(
+    BaseSuccessResponseSchema, DataModeratorResponseSchema
 ):
     pass
+
+
+class RefreshAccessTokenResponse(BaseSuccessResponseSchema):
+    access_token: str
+    refresh_token: str
+
+
+class ChangePasswordSchema(BaseModel):
+    """Schema for changing password of a mod"""
+
+    old_password: str
+    new_password: str
+    confirm_new_password: str
 
 
 class UpdateModeratorSchema(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
     username: str | None = None
-    password: str | None = None
-    country_preferences: None | list[ACE] = Field(min_length=1, default=[])
+    country_preferences: list[ACE] = Field(default=[])
 
 
 class UpdateModeratorByAdminSchema(UpdateModeratorSchema):

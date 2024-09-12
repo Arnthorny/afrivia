@@ -99,14 +99,6 @@ class ModeratorService(Service):
             raise self.DUP_EXC
         return mod
 
-        # user_schema = user.UserData.model_validate(new_user, from_attributes=True)
-        #     return user.AdminCreateUserResponse(
-        #         message="User created successfully",
-        #         status_code=201,
-        #         status="success",
-        #         data=user_schema,
-        #     )
-
     def update(
         self,
         db: Session,
@@ -310,13 +302,16 @@ class ModeratorService(Service):
         except jwt.exceptions.InvalidTokenError:
             raise credentials_exception
 
-    def refresh_access_token(self, current_refresh_token: str):
+    def refresh_access_token(self, current_refresh_token: str | None):
         """Function to generate new access token and rotate refresh token"""
 
         credentials_exception = HTTPException(
             status_code=401,
             detail="Could not validate refresh token",
         )
+
+        if current_refresh_token is None:
+            raise credentials_exception
 
         mod_id = self.verify_refresh_token(current_refresh_token, credentials_exception)
 
@@ -409,13 +404,6 @@ class ModeratorService(Service):
 
         user.password = self.hash_password(new_password)
         db.commit()
-
-        # Return the passwords in the specified format
-        return {
-            "oldPassword": old_password,
-            "newPassword": user.password,
-            "confirmNewPassword": confirm_new_password,
-        }
 
     def get_current_admin(
         self,

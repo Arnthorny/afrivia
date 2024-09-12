@@ -5,32 +5,38 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.middleware.sessions import SessionMiddleware  # required for refresh token
+from starlette.middleware.sessions import (
+    SessionMiddleware,
+)  # required for refresh token
+
 # from api.utils.logger import logger
 from api.utils.success_response import success_response
 from api.v1.routes import api_version_one
 from api.utils.settings import settings
 
 
-app = FastAPI(title='Afrivia API')
-
-
+app = FastAPI(title="Afrivia API")
 
 
 # TODO Is this useful?
-app.add_middleware(SessionMiddleware, 
-                   secret_key=settings.SECRET_KEY,
-                   max_age=settings.JWT_REFRESH_EXPIRY * 24 * 60 * 60)
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=settings.SECRET_KEY,
+    same_site="none",
+    https_only=False,
+    max_age=settings.JWT_REFRESH_EXPIRY * 24 * 60 * 60,
+)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*'],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 app.include_router(api_version_one)
+
 
 # REGISTER EXCEPTION HANDLERS
 @app.exception_handler(HTTPException)
@@ -69,7 +75,6 @@ async def validation_exception(request: Request, exc: RequestValidationError):
     )
 
 
-
 @app.exception_handler(Exception)
 async def exception(request: Request, exc: Exception):
     """Other exception handlers"""
@@ -91,10 +96,11 @@ async def get_root(request: Request) -> dict:
         message="Welcome to Afrivia API",
     )
 
+
 if __name__ == "__main__":
     uvicorn.run(
-        "main:app", 
-        port=7001, 
+        "main:app",
+        port=7001,
         reload=True,
         workers=4,
     )
