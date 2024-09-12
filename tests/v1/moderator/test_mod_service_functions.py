@@ -234,14 +234,10 @@ class TestModeratorService:
         confirm_new_password = "new_password"
 
 
+        mod_service.change_password(old_password, new_password, confirm_new_password, user, db)
 
-        # mocker.patch.object(mod_service, 'verify_password', return_value=True)
-        # mocker.patch.object(mod_service, 'hash_password', return_value="hashed_new_password")
-
-        result = mod_service.change_password(old_password, new_password, confirm_new_password, user, db)
-
-        assert result["oldPassword"] == old_password
-        assert result["confirmNewPassword"] == confirm_new_password
+        assert mod_service.verify_password("new_password", user.password) is\
+            True
 
 
     

@@ -101,7 +101,6 @@ class TestCreateSubmission:
 
         response = client.post("/api/v1/submissions", json=test_body_copy)
 
-        # print(response.json())
         assert response.status_code == 201
         assert response.json()["data"]["question"] == test_sub_req_body_1["question"]
         assert response.json()["data"]["category"] == test_sub_req_body_1["category"]
@@ -141,7 +140,6 @@ class TestCreateSubmission:
 
         response = client.post("/api/v1/submissions", json=test_body_copy)
 
-        # print(response.json())
         assert response.status_code == 422
 
     def test_create_submission_malformed_data(self, mocker):
@@ -157,5 +155,4 @@ class TestCreateSubmission:
 
         response = client.post("/api/v1/submissions", json=test_body_copy)
 
-        # print(response.json())
         assert response.status_code == 422
