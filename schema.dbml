@@ -25,7 +25,7 @@ Table moderators {
 }
 
 Table mod_country_preferences {
-  moderator_id varchar [ref: > moderators.id, not null]
+  moderator_id varchar [not null]
   country_id int [ref: > countries.id, not null]
   Note {
     'This table links moderators to their preferred country[ies]'
@@ -34,6 +34,8 @@ Table mod_country_preferences {
     (moderator_id, country_id) [pk]
   }
 }
+
+Ref: mod_country_preferences.moderator_id > moderators.id [delete: cascade]
 
 
 Table categories {
@@ -60,6 +62,7 @@ Table countries {
 
 
 enum submission_status_enum {
+  awaiting
   pending
   approved
   rejected
@@ -75,7 +78,7 @@ Table submissions {
   id varchar [pk]
   question text [not null, unique]
   status submission_status_enum [not null, default: 'pending']
-  moderator_id varchar [ref: > moderators.id, not null]
+  moderator_id varchar [ref: > moderators.id, null]
   difficulty difficulty_enum [not null] 
   submission_note text [null]
 
@@ -89,7 +92,7 @@ Table submissions {
 
 Table submission_options {
   id varchar [pk, not null]
-  submission_id varchar [ref: > submissions.id, not null]
+  submission_id varchar [not null]
   content text [not null]
   is_correct bool [default: false, not null]
   created_at timestamptz [default: `now()`]
@@ -99,6 +102,7 @@ Table submission_options {
     'This holds all options from user submissions'
   }
 }
+Ref: submission_options.submission_id > submissions.id [delete: cascade]
 
 Table trivias {
   id varchar [pk, not null]
@@ -116,7 +120,7 @@ Table trivias {
 
 Table trivia_options {
   id varchar [pk, not null]
-  trivia_id varchar [ref: > trivias.id, not null]
+  trivia_id varchar [not null]
   content text [not null]
   is_correct bool [default: false, not null]
   created_at timestamptz [default: `now()`]
@@ -127,40 +131,53 @@ Table trivia_options {
   }
 }
 
+Ref: trivia_options.trivia_id > trivias.id [delete: cascade]
+
+
 Table categories_trivias {
   category_id int [ref: > categories.id, not null]
-  trivia_id varchar [ref: > trivias.id, not null]
+  trivia_id varchar [not null]
 
   indexes {
     (category_id, trivia_id) [pk]
   }
 }
 
+Ref: categories_trivias.trivia_id > trivias.id [delete: cascade]
+
+
 Table countries_trivias {
   country_id int [ref: > countries.id, not null]
-  trivia_id varchar [ref: > trivias.id, not null]
+  trivia_id varchar [not null]
 
   indexes {
     (country_id, trivia_id) [pk]
   }
 }
 
+Ref: countries_trivias.trivia_id > trivias.id [delete: cascade]
+
+
 Table categories_submissions {
   category_id int [ref: > categories.id, not null]
-  submission_id varchar [ref: > submissions.id, not null]
+  submission_id varchar [not null]
 
   indexes {
     (category_id, submission_id) [pk]
   }
 }
 
+Ref: categories_submissions.submission_id > submissions.id [delete: cascade]
+
+
 Table countries_submissions {
   country_id int [ref: > countries.id, not null]
-  submission_id varchar [ref: > submissions.id, not null]
+  submission_id varchar [not null]
 
   indexes {
     (country_id, submission_id) [pk]
   }
 }
 
+Ref: countries_submissions.submission_id > submissions.id [delete: cascade]
 

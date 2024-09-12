@@ -18,7 +18,7 @@ class Submission(BaseTableModel):
     status = Column(
         Enum(SubmissionStatusEnum), nullable=False, default=SubmissionStatusEnum.pending
     )
-    moderator_id = Column(String, ForeignKey("moderators.id"), nullable=False)
+    moderator_id = Column(String, ForeignKey("moderators.id"), nullable=True)
     difficulty = Column(Enum(DifficultyEnum), nullable=False)
     submission_note = Column(Text)
 
@@ -26,7 +26,6 @@ class Submission(BaseTableModel):
     options = relationship(
         "SubmissionOption",
         back_populates="submission_question",
-        cascade="all, delete-orphan",
     )
 
     categories = relationship(
@@ -67,10 +66,12 @@ class Submission(BaseTableModel):
 class SubmissionOption(BaseTableModel):
     __tablename__ = "submission_options"
 
-    submission_id = Column(String, ForeignKey("submissions.id"), nullable=False)
+    submission_id = Column(
+        String, ForeignKey("submissions.id", ondelete="CASCADE"), nullable=False
+    )
     content = Column(Text, nullable=False)
     is_correct = Column(Boolean, default=False, nullable=False)
 
     submission_question = relationship(
-        "Submission", back_populates="options", uselist=False
+        "Submission", back_populates="options", uselist=False, passive_deletes=True
     )
