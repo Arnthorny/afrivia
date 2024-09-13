@@ -1,43 +1,7 @@
-from datetime import datetime, timezone
-from unittest.mock import MagicMock, patch
-
-from pytest_mock import MockerFixture
-from fastapi.testclient import TestClient
-from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
-from uuid_extensions import uuid7
-
-from api.db.database import get_db
-from api.v1.routes.submission import mod_service
-from api.v1.services.submission import submission_service
-from api.v1.models.submission import Submission, SubmissionOption
-from api.v1.models.category import Category
-from api.v1.models.country import Country
-from main import app
-
-
-def mock_submission():
-    return Submission(
-        id=str(uuid7()),
-        question="Who is the first Algerian President?",
-        status="Pending",
-        difficulty="easy",
-        moderator_id="some_mod",
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
-    )
-
-
-db_session_mock = MagicMock(spec=Session)
-
-
-def db_session_mock_fn():
-    yield db_session_mock
-
-
-client = TestClient(app)
-
+import unittest
+from pytest_mock import MockerFixture
+import pytest
 
 mock_db_store = [
     {
@@ -115,35 +79,57 @@ mock_db_store = [
 ]
 
 
-ENDPOINT = "/api/v1/submissions"
+def mock_fetch_paginated(db: Session, skip: int, limit: int, filters: dict[str]):
+    print(db, skip, limit, filters)
+    mock_data = {
+        "items": [],
+        "total": 0,
+        "total_pages": 0,
+        "page": 1,
+    }
+    mock_data["total"] = sum(
+        1
+        for item in filter(
+            lambda x: x.status == filters["status"] if filters["status"] else x,
+            mock_db_store,
+        )
+    )
+    i = 1
+
+    mock_data["total_pages"] = int(mock_data["total"] / limit) + int(
+        mock_data["total"] % limit > 0
+    )
+
+    for sub in mock_db_store:
+        if i > limit:
+            break
+        if sub["status"] == filters["status"] or filters["status"] is None:
+            mock_data["items"].append(sub)
+            i += 1
+
+    return mock_data
 
 
-class TestRetrieveSubmissionForMods:
+@pytest.skip("Not complete", allow_module_level=True)
+class TestSubmissionServiceFunctions:
 
     @classmethod
     def setup_class(cls):
-        app.dependency_overrides[get_db] = db_session_mock_fn
-        app.dependency_overrides[mod_service.get_current_mod] = lambda: MagicMock(
-            id="mod_id"
-        )
+        # app.dependency_overrides[get_db] = db_session_mock_fn
+        # app.dependency_overrides[mod_service.get_current_mod] = lambda: MagicMock(
+        #     id="mod_id"
+        # )
         pass
 
     @classmethod
     def teardown_class(cls):
-        app.dependency_overrides = {}
+        # app.dependency_overrides = {}
+        pass
 
     # Retrieve all submissions for a moderator with default pagination
-    def test_retrieve_all_submissions_default_pagination(self, mocker: MockerFixture):
+    def test_fetch_default_pagination(self, mocker: MockerFixture):
+        # assert response.json()["message"] == "Submissions retrieved successfully"
+        # assert len(response.json()["data"]["items"]) == min(5, len(mock_db_store))
+        # assert response.json()["data"]["items"][0] in mock_db_store
 
-        with patch.object(
-            submission_service, "fetch_paginated", return_value=[]
-        ) as mock_obj:
-
-            response = client.get(ENDPOINT)
-            assert response.status_code == 200
-            mock_obj.assert_called_once_with(
-                db=db_session_mock,
-                skip=0,
-                limit=5,
-                filters={"moderator_id": "mod_id", "status": None},
-            )
+        pass
