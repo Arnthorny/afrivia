@@ -43,6 +43,12 @@ class ModeratorService(Service):
         detail="Moderator not found",
     )
 
+    CREDENTIALS_EXC = HTTPException(
+        status_code=401,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
     def fetch_all():
         pass
 
@@ -346,6 +352,9 @@ class ModeratorService(Service):
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+        if credentials is None:
+            raise credentials_exception
 
         mod_id = self.verify_access_token(
             credentials.credentials, credentials_exception

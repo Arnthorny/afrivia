@@ -8,12 +8,7 @@ from api.v1.models.association import (
     category_trivia_association,
 )
 from api.v1.models.base_model import BaseTableModel
-
-
-class DifficultyEnum(str, enum.Enum):
-    easy = "easy"
-    medium = "medium"
-    hard = "hard"
+from api.v1.schemas.submission import DifficultyEnum
 
 
 class Trivia(BaseTableModel):
