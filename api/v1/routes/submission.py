@@ -1,16 +1,12 @@
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import APIRouter, Depends, Query
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from typing import Annotated, Literal
 
 from api.db.database import get_db
 from api.utils.success_response import success_response
-from api.v1.schemas.submission import (
-    CreateSubmissionSchema,
-    PostSubmissionResponseSchema,
-    PostSubmissionResponseModelSchema,
-    PaginatedResponseModelSchema,
-)
+from api.v1.schemas import submission as s_schema
+
 from api.v1.services.moderator import mod_service, Moderator
 from api.v1.services.submission import submission_service
 from api.utils.logger import logger
@@ -20,9 +16,11 @@ assigned_submissions = APIRouter(prefix="/assigned-submissions", tags=["Submissi
 submissions = APIRouter(prefix="/submissions", tags=["Submissions"])
 
 
-@submissions.post("", response_model=PostSubmissionResponseModelSchema, status_code=201)
+@submissions.post(
+    "", response_model=s_schema.PostSubmissionResponseModelSchema, status_code=201
+)
 async def create_submission(
-    schema: CreateSubmissionSchema, db: Session = Depends(get_db)
+    schema: s_schema.CreateSubmissionSchema, db: Session = Depends(get_db)
 ):
     """Endpoint to create a new submission.
 
@@ -37,16 +35,18 @@ async def create_submission(
 
     logger.info(f"Created new submission. ID: {submission.id}.")
     return success_response(
-        data=jsonable_encoder(PostSubmissionResponseSchema.model_validate(s_dict)),
+        data=jsonable_encoder(
+            s_schema.PostSubmissionResponseSchema.model_validate(s_dict)
+        ),
         message="Successfully added submission",
-        status_code=status.HTTP_201_CREATED,
+        status_code=201,
     )
 
 
 @assigned_submissions.get(
-    "", response_model=PaginatedResponseModelSchema, status_code=200
+    "", response_model=s_schema.PaginatedResponseModelSchema, status_code=200
 )
-async def retrieve_submission_for_mods(
+async def retrieve_submissions_for_mods(
     status: Literal["pending", "approved", "rejected"] | None = None,
     page: Annotated[int | None, Query(gt=0)] = 1,
     limit: Annotated[int | None, Query(gt=0)] = 5,
@@ -73,4 +73,64 @@ async def retrieve_submission_for_mods(
 
     return success_response(
         status_code=200, message="Submissions retrieved successfully", data=paged_res
+    )
+
+
+@assigned_submissions.get(
+    "/{id}",
+    response_model=s_schema.GetSubmissionForModResponseModelSchema,
+    status_code=200,
+)
+async def retrieve_single_submission_for_mods(
+    id: str,
+    db: Session = Depends(get_db),
+    current_mod: Moderator = Depends(mod_service.get_current_mod),
+):
+    """Endpoint to retrieve single submission assigned to a particular moderator\n
+
+    Args:\n
+        id (str): The id of submission to be retrieved.\n
+        db (Session): The db session.\n
+        current_mod (Moderator): Mod making the request.
+    """
+
+    subm = submission_service.fetch_assigned_submission(
+        db=db, mod_id=current_mod.id, target_id=id
+    )
+
+    return success_response(
+        status_code=200,
+        message="Submissions retrieved successfully",
+        data=s_schema.RetrieveSubmissionForModSchema.model_validate(subm.to_dict()),
+    )
+
+
+@assigned_submissions.patch(
+    "/{id}/review",
+    response_model=s_schema.GetSubmissionForModResponseModelSchema,
+    status_code=200,
+)
+async def approve_single_submission(
+    id: str,
+    status: Literal["approved", "rejected"],
+    db: Session = Depends(get_db),
+    current_mod: Moderator = Depends(mod_service.get_current_mod),
+):
+    """Endpoint to approve/reject single submission assigned to a particular moderator\n
+
+    Args:\n
+        id (str): The id of submission to be retrieved.\n
+        review_status (str): query parameter for use in reviewing.\n
+        db (Session): The db session.\n
+        current_mod (Moderator): Mod making the request.
+    """
+
+    subm = submission_service.review_assigned_submission(
+        db=db, mod_id=current_mod.id, target_id=id, review_status=status
+    )
+
+    return success_response(
+        status_code=200,
+        message=f"Submission marked as {status}",
+        data=s_schema.RetrieveSubmissionForModSchema.model_validate(subm.to_dict()),
     )
