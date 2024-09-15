@@ -9,7 +9,6 @@ from api.v1.services.submission import submission_service
 from main import app
 
 
-
 db_session_mock = MagicMock(spec=Session)
 
 

@@ -1,3 +1,4 @@
+from typing import Literal
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
@@ -22,6 +23,16 @@ class SubmissionService(Service):
     Args:
         Service (_type_): Abstract Service to inherit from
     """
+
+    NOT_FOUND_EXC = HTTPException(
+        status_code=404,
+        detail="Submission not found",
+    )
+
+    FORBIDDEN_EXC = HTTPException(
+        status_code=403,
+        detail="You do not have permission to access this resource",
+    )
 
     def update(self):
         pass
@@ -187,6 +198,37 @@ class SubmissionService(Service):
         resp.pop("results", None)
 
         return resp
+
+    def fetch_assigned_submission(
+        self, db: Session, mod_id: str, target_id: str
+    ) -> Submission:
+        filters = {"id": target_id}
+        submission = db.query(Submission).filter_by(**filters).first()
+
+        if submission is None:
+            raise self.NOT_FOUND_EXC
+
+        elif submission.moderator_id != mod_id:
+            raise self.FORBIDDEN_EXC
+
+        return submission
+
+    def review_assigned_submission(
+        self,
+        db: Session,
+        mod_id: str,
+        target_id: str,
+        review_status: Literal["approved", "pending"],
+    ) -> Submission:
+
+        submission = self.fetch_assigned_submission(
+            db=db, mod_id=mod_id, target_id=target_id
+        )
+
+        submission.status = review_status
+        db.commit()
+
+        return submission
 
 
 submission_service = SubmissionService()
