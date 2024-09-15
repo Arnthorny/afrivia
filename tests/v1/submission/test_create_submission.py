@@ -121,7 +121,7 @@ class TestCreateSubmission:
 
         mocker.patch.object(submission_service, "create", mock_create)
         mocker.patch(
-            "api.v1.routes.submission.PostSubmissionResponseSchema",
+            "api.v1.schemas.submission.PostSubmissionResponseSchema",
             return_value=mocker.Mock(),
         )
 
@@ -148,9 +148,9 @@ class TestCreateSubmission:
             "question": "?",
             "incorrect_options": ["Lil Wayne", "George Bush", "Barack Obama"],
             "correct_option": "Abdelmadjid Tebboune",
-            "difficulty": "not that bad", # Should be a member of an enum
+            "difficulty": "not that bad",  # Should be a member of an enum
             "category": "General Knowledge",
-            "countries": "Algeria", # Should be a list of countries
+            "countries": "Algeria",  # Should be a list of countries
         }
 
         response = client.post("/api/v1/submissions", json=test_body_copy)

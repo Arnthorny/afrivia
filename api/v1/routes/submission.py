@@ -46,7 +46,7 @@ async def create_submission(
 @assigned_submissions.get(
     "", response_model=s_schema.PaginatedResponseModelSchema, status_code=200
 )
-async def retrieve_submission_for_mods(
+async def retrieve_submissions_for_mods(
     status: Literal["pending", "approved", "rejected"] | None = None,
     page: Annotated[int | None, Query(gt=0)] = 1,
     limit: Annotated[int | None, Query(gt=0)] = 5,
@@ -131,6 +131,6 @@ async def approve_single_submission(
 
     return success_response(
         status_code=200,
-        message="Submission marked as approved",
+        message=f"Submission marked as {status}",
         data=s_schema.RetrieveSubmissionForModSchema.model_validate(subm.to_dict()),
     )

@@ -71,8 +71,14 @@ class TestRetrieveSingleSubmissionForMods:
         assert subm.status == "rejected"
         assert response.json()["data"] == []
 
+    # Invalid status parameter
+    def test_reject_single_submission(self, mocker: MockerFixture):
+
+        response = client.patch(ENDPOINT.format("submission-id", "accept"))
+        assert response.status_code == 422
+
     # Approve single nonexistent submission for a moderator
-    def test_retrieve_single_submission_nonexistent(self, mocker: MockerFixture):
+    def test_review_single_submission_nonexistent(self, mocker: MockerFixture):
 
         db_session_mock.query().filter_by().first.return_value = None
 
@@ -83,7 +89,7 @@ class TestRetrieveSingleSubmissionForMods:
         assert response.json()["message"] == "Submission not found"
 
     # Reject single unassigned submission for a moderator
-    def test_retrieve_single_unassigned_submission(self, mocker: MockerFixture):
+    def test_review_single_unassigned_submission(self, mocker: MockerFixture):
 
         subm = mocker.Mock(question="Who are you?", moderator_id="unassigned_mod_id")
         mocker.patch.object(
@@ -100,7 +106,7 @@ class TestRetrieveSingleSubmissionForMods:
         )
 
     # Approve single submission for a unauthenticated user
-    def test_retrieve_single_submission_unauthenticated(self, mocker: MockerFixture):
+    def test_review_single_submission_unauthenticated(self, mocker: MockerFixture):
 
         subm = mocker.Mock(question="Who are you?", moderator_id="unassigned_mod_id")
         mocker.patch.object(

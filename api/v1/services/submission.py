@@ -218,7 +218,7 @@ class SubmissionService(Service):
         db: Session,
         mod_id: str,
         target_id: str,
-        review_status: Literal["approved", "pending"],
+        review_status: Literal["approved", "rejected"],
     ) -> Submission:
 
         submission = self.fetch_assigned_submission(
@@ -227,6 +227,7 @@ class SubmissionService(Service):
 
         submission.status = review_status
         db.commit()
+        db.refresh(submission)
 
         return submission
 
