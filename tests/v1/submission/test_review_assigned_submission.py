@@ -47,7 +47,7 @@ class TestRetrieveSingleSubmissionForMods:
             RetrieveSubmissionForModSchema, "model_validate", return_value=[]
         )
 
-        db_session_mock.query().filter_by().first.return_value = subm
+        mocker.patch.object(submission_service, "fetch", return_value=subm)
 
         response = client.patch(ENDPOINT.format("submission-id", "approved"))
         assert response.status_code == 200
@@ -63,8 +63,7 @@ class TestRetrieveSingleSubmissionForMods:
         mocker.patch.object(
             RetrieveSubmissionForModSchema, "model_validate", return_value=[]
         )
-
-        db_session_mock.query().filter_by().first.return_value = subm
+        mocker.patch.object(submission_service, "fetch", return_value=subm)
 
         response = client.patch(ENDPOINT.format("submission-id", "rejected"))
         assert response.status_code == 200
@@ -80,7 +79,7 @@ class TestRetrieveSingleSubmissionForMods:
     # Approve single nonexistent submission for a moderator
     def test_review_single_submission_nonexistent(self, mocker: MockerFixture):
 
-        db_session_mock.query().filter_by().first.return_value = None
+        mocker.patch.object(submission_service, "fetch", return_value=None)
 
         response = client.patch(
             ENDPOINT.format("non-existent-submission-id", "approved")
@@ -96,7 +95,7 @@ class TestRetrieveSingleSubmissionForMods:
             RetrieveSubmissionForModSchema, "model_validate", return_value=[]
         )
 
-        db_session_mock.query().filter_by().first.return_value = subm
+        mocker.patch.object(submission_service, "fetch", return_value=subm)
 
         response = client.patch(ENDPOINT.format("submission-id", "rejected"))
         assert response.status_code == 403
