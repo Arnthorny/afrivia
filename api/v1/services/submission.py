@@ -44,7 +44,10 @@ class SubmissionService(Service):
         pass
 
     def fetch(self, db: Session, id: str):
-        pass
+        """Fetches a submission by their id"""
+
+        mod = db.get(Submission, id)
+        return mod
 
     def extract_countries_categories_options(
         self, schema_d: dict, db: Session
@@ -202,8 +205,7 @@ class SubmissionService(Service):
     def fetch_assigned_submission(
         self, db: Session, mod_id: str, target_id: str
     ) -> Submission:
-        filters = {"id": target_id}
-        submission = db.query(Submission).filter_by(**filters).first()
+        submission = self.fetch(db, target_id)
 
         if submission is None:
             raise self.NOT_FOUND_EXC
