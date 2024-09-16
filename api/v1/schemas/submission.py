@@ -31,6 +31,8 @@ class CategoryEnum(str, Enum):
     celebrity = "Celebrities"
     animals = "Animals"
     folklore = "Folklore"
+    language = "Language"
+    food_drinks = "Food and Drinks"
 
 
 class SubmissionBaseSchema(BaseModel):

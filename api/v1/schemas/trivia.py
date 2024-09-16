@@ -17,6 +17,18 @@ class CreateTriviaSchema(TriviaBaseSchema):
     countries: list[ACE] = Field(default=[])
 
 
+class UpdateTriviaSchema(BaseModel):
+    question: str | None = Field(min_length=1, default=None)
+    incorrect_options: list[str] | None = Field(
+        min_length=3, max_length=3, default=None
+    )
+    correct_option: str | None = Field(min_length=1, default=None)
+    difficulty: DifficultyEnum | None = None
+
+    category: CategoryEnum | None = None
+    countries: list[ACE] | None = Field(default=None)
+
+
 class HelperResponseSchemaOne(CreateTriviaSchema):
     id: str
     created_at: datetime

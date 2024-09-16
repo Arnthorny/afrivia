@@ -26,6 +26,7 @@ class Submission(BaseTableModel):
     options = relationship(
         "SubmissionOption",
         back_populates="submission_question",
+        cascade="all, delete-orphan",
     )
 
     categories = relationship(

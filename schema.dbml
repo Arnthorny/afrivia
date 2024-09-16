@@ -106,7 +106,7 @@ Ref: submission_options.submission_id > submissions.id [delete: cascade]
 
 Table trivias {
   id varchar [pk, not null]
-  question text [not null]
+  question text [not null, unique]
   difficulty difficulty_enum [not null]
   submission_id varchar [ref: > submissions.id]
   created_at timestamptz [default: `now()`]

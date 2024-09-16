@@ -1,7 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
 -- Generated at: 2024-09-12T10:11:50.448Z
-
 CREATE TYPE "submission_status_enum" AS ENUM (
   'awaiting',
   'pending',
@@ -9,11 +8,7 @@ CREATE TYPE "submission_status_enum" AS ENUM (
   'rejected'
 );
 
-CREATE TYPE "difficulty_enum" AS ENUM (
-  'easy',
-  'medium',
-  'hard'
-);
+CREATE TYPE "difficulty_enum" AS ENUM ('easy', 'medium', 'hard');
 
 CREATE TABLE "moderators" (
   "id" varchar PRIMARY KEY,
@@ -71,7 +66,7 @@ CREATE TABLE "submission_options" (
 
 CREATE TABLE "trivias" (
   "id" varchar PRIMARY KEY NOT NULL,
-  "question" text NOT NULL,
+  "question" text UNIQUE NOT NULL,
   "difficulty" difficulty_enum NOT NULL,
   "submission_id" varchar,
   "created_at" timestamptz DEFAULT (now()),
@@ -127,30 +122,72 @@ COMMENT ON TABLE "trivias" IS 'This table holds all questions in the trivia db';
 
 COMMENT ON TABLE "trivia_options" IS 'This table holds all options in the trivia db';
 
-ALTER TABLE "mod_country_preferences" ADD FOREIGN KEY ("country_id") REFERENCES "countries" ("id");
+ALTER TABLE
+  "mod_country_preferences"
+ADD
+  FOREIGN KEY ("country_id") REFERENCES "countries" ("id");
 
-ALTER TABLE "mod_country_preferences" ADD FOREIGN KEY ("moderator_id") REFERENCES "moderators" ("id") ON DELETE CASCADE;
+ALTER TABLE
+  "mod_country_preferences"
+ADD
+  FOREIGN KEY ("moderator_id") REFERENCES "moderators" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "submissions" ADD FOREIGN KEY ("moderator_id") REFERENCES "moderators" ("id");
+ALTER TABLE
+  "submissions"
+ADD
+  FOREIGN KEY ("moderator_id") REFERENCES "moderators" ("id");
 
-ALTER TABLE "submission_options" ADD FOREIGN KEY ("submission_id") REFERENCES "submissions" ("id") ON DELETE CASCADE;
+ALTER TABLE
+  "submission_options"
+ADD
+  FOREIGN KEY ("submission_id") REFERENCES "submissions" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "trivias" ADD FOREIGN KEY ("submission_id") REFERENCES "submissions" ("id");
+ALTER TABLE
+  "trivias"
+ADD
+  FOREIGN KEY ("submission_id") REFERENCES "submissions" ("id");
 
-ALTER TABLE "trivia_options" ADD FOREIGN KEY ("trivia_id") REFERENCES "trivias" ("id") ON DELETE CASCADE;
+ALTER TABLE
+  "trivia_options"
+ADD
+  FOREIGN KEY ("trivia_id") REFERENCES "trivias" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "categories_trivias" ADD FOREIGN KEY ("category_id") REFERENCES "categories" ("id");
+ALTER TABLE
+  "categories_trivias"
+ADD
+  FOREIGN KEY ("category_id") REFERENCES "categories" ("id");
 
-ALTER TABLE "categories_trivias" ADD FOREIGN KEY ("trivia_id") REFERENCES "trivias" ("id") ON DELETE CASCADE;
+ALTER TABLE
+  "categories_trivias"
+ADD
+  FOREIGN KEY ("trivia_id") REFERENCES "trivias" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "countries_trivias" ADD FOREIGN KEY ("country_id") REFERENCES "countries" ("id");
+ALTER TABLE
+  "countries_trivias"
+ADD
+  FOREIGN KEY ("country_id") REFERENCES "countries" ("id");
 
-ALTER TABLE "countries_trivias" ADD FOREIGN KEY ("trivia_id") REFERENCES "trivias" ("id") ON DELETE CASCADE;
+ALTER TABLE
+  "countries_trivias"
+ADD
+  FOREIGN KEY ("trivia_id") REFERENCES "trivias" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "categories_submissions" ADD FOREIGN KEY ("category_id") REFERENCES "categories" ("id");
+ALTER TABLE
+  "categories_submissions"
+ADD
+  FOREIGN KEY ("category_id") REFERENCES "categories" ("id");
 
-ALTER TABLE "categories_submissions" ADD FOREIGN KEY ("submission_id") REFERENCES "submissions" ("id") ON DELETE CASCADE;
+ALTER TABLE
+  "categories_submissions"
+ADD
+  FOREIGN KEY ("submission_id") REFERENCES "submissions" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "countries_submissions" ADD FOREIGN KEY ("country_id") REFERENCES "countries" ("id");
+ALTER TABLE
+  "countries_submissions"
+ADD
+  FOREIGN KEY ("country_id") REFERENCES "countries" ("id");
 
-ALTER TABLE "countries_submissions" ADD FOREIGN KEY ("submission_id") REFERENCES "submissions" ("id") ON DELETE CASCADE;
+ALTER TABLE
+  "countries_submissions"
+ADD
+  FOREIGN KEY ("submission_id") REFERENCES "submissions" ("id") ON DELETE CASCADE;
