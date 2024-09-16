@@ -73,8 +73,9 @@ class TriviaService(Service):
         options_models_list: list[TriviaOption] = []
 
         # Append incorrect options first, if any
-        for option in all_options[0:3]:
-            options_models_list.append(TriviaOption(content=option))
+        if len(all_options) >= 3:
+            for option in all_options[0:3]:
+                options_models_list.append(TriviaOption(content=option))
 
         # Append correct option(last element) if it is not None.
         if all_options[-1] is not None:
@@ -175,7 +176,6 @@ class TriviaService(Service):
                 setattr(trivia, key, value)
 
             # The above may not all be present in the extract from the schema dump for an update
-
             if country_models_list is not None:
                 trivia.countries = country_models_list
             if category_models_list is not None:
@@ -183,20 +183,24 @@ class TriviaService(Service):
 
             if options_models_list is not None and options_models_list != []:
                 existing_options: list[TriviaOption] = trivia.options
-                for i, existing_option in enumerate(existing_options):
+                # Existing options sorted with correct option last
+                existing_options.sort(key=lambda x: x.is_correct)
+                # print(list(map(lambda x: x.content, options_models_list)))
+                for i in range(len((existing_options))):
                     # Find and update correct option model first, if applicable
-                    if (
-                        existing_option.is_correct
-                        and options_models_list[-1].is_correct
-                    ):
-                        existing_option.content = options_models_list[-1].content
-                        continue
-
-                    existing_option.content = options_models_list[i].content
+                    if len(options_models_list) == 1:
+                        existing_options[-1].content = options_models_list[-1].content
+                        break
+                    # Update incorrect option models only
+                    elif len(options_models_list) == 3:
+                        if i == 3:
+                            break
+                        existing_options[i].content = options_models_list[i].content
+                    else:
+                        existing_options[i].content = options_models_list[i].content
 
             db.commit()
             db.refresh(trivia)
-
             return trivia
 
         except IntegrityError as e:
