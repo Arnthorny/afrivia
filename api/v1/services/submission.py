@@ -46,8 +46,8 @@ class SubmissionService(Service):
     def fetch(self, db: Session, id: str):
         """Fetches a submission by their id"""
 
-        mod = db.get(Submission, id)
-        return mod
+        subm = db.get(Submission, id)
+        return subm
 
     def extract_countries_categories_options(
         self, schema_d: dict, db: Session

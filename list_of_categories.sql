@@ -10,4 +10,6 @@ INSERT INTO categories(name) VALUES
  ('Art'),
  ('Celebrities'),
  ('Animals'),
- ('Folklore');
+ ('Folklore'),
+ ('Language'),
+ ('Food and Drinks');

@@ -4,18 +4,21 @@ from sqlalchemy import or_
 from api.v1.schemas.submission import CategoryEnum as CE
 
 
-
 class CategoryService(Service):
     @staticmethod
-    def fetch_categories(db, list_of_categories: list[CE]) -> list[Category]:
-        """This function retrieves category models 
+    def fetch_categories(
+        db, list_of_categories: list[CE] | None
+    ) -> list[Category] | None:
+        """This function retrieves category models
 
         Args:
-            list_of_categories (list): List of category names whose models are required
+            list_of_categories (list | None): List of category names whose models are required. None if not required.
 
         Returns:
             list: List of Category models that match the given category names
         """
+        if list_of_categories is None:
+            return None
         if not list_of_categories:
             return []
         conditions = []

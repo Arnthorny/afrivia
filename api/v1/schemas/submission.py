@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field
 from datetime import datetime
 from api.v1.schemas.african_countries_enum import AfricanCountriesEnum as ACE
 from api.v1.schemas.base_schemas import BaseSuccessResponseSchema
@@ -31,6 +31,8 @@ class CategoryEnum(str, Enum):
     celebrity = "Celebrities"
     animals = "Animals"
     folklore = "Folklore"
+    language = "Language"
+    food_drinks = "Food and Drinks"
 
 
 class SubmissionBaseSchema(BaseModel):

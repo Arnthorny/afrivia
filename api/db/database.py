@@ -1,5 +1,6 @@
 """ The database module
 """
+
 from sqlalchemy.orm import sessionmaker, scoped_session, declarative_base
 from sqlalchemy import create_engine
 from api.utils.settings import settings, BASE_DIR
