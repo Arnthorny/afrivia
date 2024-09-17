@@ -263,3 +263,34 @@ async def retrieve_valid_categories():
         message="Successfully retrieved all valid categories",
         status_code=200,
     )
+
+
+@submissions.patch(
+    "/{id}/reassign",
+    response_model=s_schema.GetSubmissionForModResponseModelSchema,
+    status_code=200,
+)
+async def reassign_submission(
+    id: str,
+    schema: s_schema.AlterModForSubmissionSchema,
+    db: Session = Depends(get_db),
+    mod: Moderator = Depends(mod_service.get_current_admin),
+):
+    """Endpoint to reassign a given submission to a valid and active mod.
+
+    Args:
+        id (str): The id of the submission to be reassigned
+        schema (s_schema.AlterModForSubmissionSchema): The schema used for the change
+        db (Session): The db session object.
+        mod (Moderator): The admin making request
+    """
+    subm = submission_service.reassign(db=db, id=id, new_mod_id=schema.moderator_id)
+    validated_schema = s_schema.PostSubmissionResponseSchema.model_validate(
+        subm.to_dict()
+    )
+
+    return success_response(
+        data=jsonable_encoder(validated_schema),
+        message="Successfully reassigned submission",
+        status_code=200,
+    )
