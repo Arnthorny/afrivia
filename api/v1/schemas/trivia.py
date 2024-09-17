@@ -15,6 +15,7 @@ class TriviaBaseSchema(BaseModel):
 class CreateTriviaSchema(TriviaBaseSchema):
     category: CategoryEnum
     countries: list[ACE] = Field(default=[])
+    submission_id: str | None = Field(min_length=36, max_length=36, default=None)
 
 
 class UpdateTriviaSchema(BaseModel):

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, EmailStr, StringConstraints
+from pydantic import BaseModel, Field, EmailStr, StringConstraints, ConfigDict
 from typing import Annotated
 from datetime import datetime
 from api.v1.schemas.african_countries_enum import AfricanCountriesEnum as ACE
@@ -40,8 +40,7 @@ class CreateModeratorResponseSchema(ModeratorBaseSchema):
     is_admin: bool
     is_active: bool
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class DataModeratorResponseSchema(BaseModel):
