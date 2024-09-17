@@ -148,6 +148,22 @@ class TestModeratorService:
             assert exc.value.status_code == 400
             assert exc.value.detail == 'Invalid user credentials'
 
+    # Authenticating a deactivated moderator with correct credentials
+    def test_authenticate_deactivated_moderator(self, mocker):
+        
+        pwd = "hashed_password"
+        h_pwd = mod_service.hash_password(pwd)
+        
+        db = mocker.Mock()
+        mod = mocker.Mock(password=h_pwd, is_active=False)
+        db.query().filter().first.return_value = mod
+        
+
+        with pytest.raises(HTTPException) as exc:
+            mod_service.authenticate_mod(db, "john.doe@example.com", h_pwd)
+            
+            assert exc.value.status_code == 401
+            assert exc.value.detail == 'Deactivated account'
 
 
     # Creating a moderator with an existing email or username
