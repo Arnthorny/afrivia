@@ -8,6 +8,7 @@ from api.utils.paginated_response import paginated_response
 from api.v1.models.submission import Submission, SubmissionOption
 from api.v1.models.trivia import Trivia
 from api.core.base.services import Service
+from api.v1.services.moderator import mod_service
 from api.v1.schemas import submission as s_schema
 from api.v1.services.country import CountryService
 from api.v1.services.category import CategoryService
@@ -290,6 +291,31 @@ class SubmissionService(Service):
             func.similarity(Trivia.question, subm.question) >= 0.6
         )
         return q.all()
+
+    def reassign(self, db: Session, id: str, new_mod_id: str) -> Submission:
+        """This service function aids in manually reassigning a submission to a given moderator
+
+        Args:
+            db (Session): db session object
+            id (str): Id of the submission
+            new_mod_id (str): id of mod to be assigned
+
+        Returns:
+            Submission:
+        """
+        subm = self.fetch(db=db, id=id, raise_404=True)
+        new_mod = mod_service.fetch(db=db, id=new_mod_id)
+
+        if new_mod is None or new_mod.is_active is False:
+            raise HTTPException(
+                status_code=400,
+                detail="Moderator does not exist or is inactive",
+                )
+        subm.moderator_id = new_mod_id
+        db.commit()
+
+        db.refresh(subm)
+        return subm
 
 
 submission_service = SubmissionService()
