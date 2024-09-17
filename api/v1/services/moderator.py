@@ -49,8 +49,17 @@ class ModeratorService(Service):
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    def fetch_all():
-        pass
+    def fetch_all(self, db: Session) -> list[Moderator]:
+        """Fetches all moderators from the database
+
+        Args:
+            db (Session): Db session object
+
+        Returns:
+            list[Moderator]: A list of all Moderator objects on the database
+        """
+        all_moderators = db.query(Moderator).all()
+        return all_moderators
 
     def fetch(self, db: Session, id: str):
         """Fetches a moderator by their id"""
@@ -154,7 +163,8 @@ class ModeratorService(Service):
         current_mod: Moderator,
         is_active: bool = False,
     ) -> Moderator:
-        """Function to deactivate or reactivate a mod. Only an admin or the target mod has permission.
+        """Function to deactivate or reactivate a mod.
+        Only an admin or the target mod has permission to make changes.
 
         Args:
             db (Session):
@@ -172,16 +182,16 @@ class ModeratorService(Service):
         if current_mod.is_admin is not True and id_target != current_mod.id:
             raise self.FORBIDDEN_EXC
 
-        mod = self.fetch(db=db, id=id_target)
+        target_mod = self.fetch(db=db, id=id_target)
 
-        if not mod:
+        if not target_mod:
             raise self.NOT_FOUND_EXC
 
-        mod.is_active = is_active
+        target_mod.is_active = is_active
         db.commit()
-        db.refresh(mod)
+        db.refresh(target_mod)
 
-        return mod
+        return target_mod
 
     def delete(self, db: Session, id_target: str, current_admin: Moderator) -> bool:
         """Function to delete a mod account. Only an admin has permission.

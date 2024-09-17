@@ -185,7 +185,6 @@ class TriviaService(Service):
                 existing_options: list[TriviaOption] = trivia.options
                 # Existing options sorted with correct option last
                 existing_options.sort(key=lambda x: x.is_correct)
-                # print(list(map(lambda x: x.content, options_models_list)))
                 for i in range(len((existing_options))):
                     # Find and update correct option model first, if applicable
                     if len(options_models_list) == 1:

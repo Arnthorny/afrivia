@@ -86,3 +86,7 @@ class UpdateModeratorByAdminSchema(UpdateModeratorSchema):
 
 class DeactivateModeratorSchema(BaseModel):
     is_active: bool
+
+
+class RetrieveModeratorsModelResponseSchema(BaseSuccessResponseSchema):
+    data: list[CreateModeratorResponseSchema]
