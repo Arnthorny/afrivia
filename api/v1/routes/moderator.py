@@ -9,6 +9,7 @@ from api.v1.schemas.moderator import (
     GetModeratorResponseModelSchema,
     ChangePasswordSchema,
     RetrieveModeratorsModelResponseSchema,
+    ReturnModeratorDataForAdmin,
 )
 from api.v1.services.moderator import mod_service, Moderator
 from api.utils.logger import logger
@@ -74,7 +75,7 @@ async def retrieve_all_moderators(
     mods = mod_service.fetch_all(db=db)
 
     validated_m_dict = [
-        CreateModeratorResponseSchema.model_validate(m.to_dict()) for m in mods
+        ReturnModeratorDataForAdmin.model_validate(m.to_dict()) for m in mods
     ]
 
     return success_response(
@@ -127,7 +128,7 @@ async def deactivate_moderator(
 
     return success_response(
         status_code=200,
-        message=f"Moderator successfully activated",
+        message=f"Moderator successfully deactivated",
         data=CreateModeratorResponseSchema.model_validate(mod.to_dict()),
     )
 
@@ -136,7 +137,7 @@ async def deactivate_moderator(
     "/{id}",
     status_code=204,
 )
-async def delete_single_trivia(
+async def delete_single_moderator(
     id: str,
     db: Session = Depends(get_db),
     mod: Moderator = Depends(mod_service.get_current_admin),
