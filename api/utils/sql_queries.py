@@ -54,3 +54,20 @@ def query_for_mods_pref_submissions() -> Select:
     )
 
     return query
+
+
+def query_for_submission_stats() -> Select:
+    """This query gets the number of total, pending, awaiting, approved and
+       rejected submissions in the database
+
+    Returns:
+        Select: SQLAlchemy select statement
+    """
+    query = select(
+        func.count().label("total"),
+        func.count().filter(Submission.status == "pending").label("pending"),
+        func.count().filter(Submission.status == "awaiting").label("awaiting"),
+        func.count().filter(Submission.status == "approved").label("approved"),
+        func.count().filter(Submission.status == "rejected").label("rejected"),
+    )
+    return query

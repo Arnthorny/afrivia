@@ -79,7 +79,7 @@ class TestRetrieveSingleSubmissionForMods:
     # Approve single nonexistent submission for a moderator
     def test_review_single_submission_nonexistent(self, mocker: MockerFixture):
 
-        mocker.patch.object(submission_service, "fetch", return_value=None)
+        mocker.patch.object(db_session_mock, "get", return_value=None)
 
         response = client.patch(
             ENDPOINT.format("non-existent-submission-id", "approved")

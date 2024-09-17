@@ -53,7 +53,7 @@ class TestRetrieveSingleSubmissionForMods:
     # Retrieve single nonexistent submission for a moderator
     def test_retrieve_single_submission_nonexistent(self, mocker: MockerFixture):
 
-        mocker.patch.object(submission_service, "fetch", return_value=None)
+        mocker.patch.object(db_session_mock, "get", return_value=None)
 
         response = client.get(ENDPOINT.format("non-existent-submission-id"))
         assert response.status_code == 404

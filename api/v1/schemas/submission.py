@@ -84,3 +84,21 @@ class GetSubmissionForModResponseModelSchema(BaseSuccessResponseSchema):
 
 class GetListOfSubmissionForModResponseModelSchema(BaseSuccessResponseSchema):
     data: list[RetrieveSubmissionForModSchema]
+
+
+class GetSubmissionStatsResponseModelSchema(BaseSuccessResponseSchema):
+    class SubmissionStatSchema(BaseModel):
+        total: int
+        pending: int
+        approved: int
+        rejected: int
+
+    data: SubmissionStatSchema
+
+
+class GetListOfCountriesResponseModelSchema(BaseSuccessResponseSchema):
+    data: list[ACE]
+
+
+class GetListOfCategoriesResponseModelSchema(BaseSuccessResponseSchema):
+    data: list[CategoryEnum]

@@ -129,7 +129,7 @@ async def update_trivia(
     "/{id}",
     status_code=204,
 )
-async def retrieve_single_trivia(
+async def delete_single_trivia(
     id: str,
     db: Session = Depends(get_db),
     mod: Moderator = Depends(mod_service.get_current_admin),
