@@ -131,6 +131,20 @@ class TestRetrieveAllSubmissions:
         assert response.status_code == 400
         assert response.json()["message"] == "Moderator does not exist or is inactive"
 
+    def test_reassign_submission_invalid_id(self, client, mocker: MockerFixture):
+        """Test to verify unsuccessful reassignment of submission as submission is nonexistent"""
+        mocked_sub = mock_sub()
+
+        mocker.patch.object(mocked_db, "get", return_value=None)
+
+        r_id = str(uuid7())
+        response = client.patch(
+            ENDPOINT_URL.format(mocked_sub.id), json={"moderator_id": r_id}
+        )
+
+        assert response.status_code == 404
+        assert response.json()["message"] == "Submission not found"
+
     def test_reassign_submission_mod_inactive(self, client, mocker: MockerFixture):
         """Test to verify unsuccessful reassignment of submission as mod is inactive."""
         mocked_sub = mock_sub()
