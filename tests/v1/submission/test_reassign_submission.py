@@ -78,7 +78,7 @@ def client():
     yield client
 
 
-class TestRetrieveAllSubmissions:
+class TestReassignSubmissions:
 
     @classmethod
     def setup_class(cls):

@@ -180,7 +180,6 @@ async def delete_single_submission(
         db (Session, optional): The db session object.
     """
     status = submission_service.delete(db=db, id=id)
-    print(status)
 
 
 @submissions.get(

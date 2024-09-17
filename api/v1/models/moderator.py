@@ -35,4 +35,8 @@ class Moderator(BaseTableModel):
             map(lambda x: x.name, self.country_preferences)
         )
 
+        obj_dict["pending_submissions"] = [
+            x.id for x in self.assigned_submissions if x.status == "pending"
+        ]
+
         return obj_dict

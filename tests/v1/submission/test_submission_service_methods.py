@@ -80,7 +80,6 @@ mock_db_store = [
 
 
 def mock_fetch_paginated(db: Session, skip: int, limit: int, filters: dict[str]):
-    print(db, skip, limit, filters)
     mock_data = {
         "items": [],
         "total": 0,
