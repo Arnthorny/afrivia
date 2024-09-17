@@ -225,13 +225,16 @@ class ModeratorService(Service):
     def authenticate_mod(self, db: Session, email: EmailStr, password: str):
         """Function to authenticate a moderator"""
 
-        mod = self.fetch_by_email(db, email=email)
+        mod: Moderator = self.fetch_by_email(db, email=email)
 
         if not mod:
             raise HTTPException(status_code=400, detail="Invalid user credentials")
 
         if not self.verify_password(password, mod.password):
             raise HTTPException(status_code=400, detail="Invalid user credentials")
+
+        if mod.is_active is False:
+            raise HTTPException(status_code=401, detail="Deactivated account")
 
         return mod
 
