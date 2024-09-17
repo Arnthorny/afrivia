@@ -6,6 +6,7 @@ from typing import Annotated, Literal
 from api.db.database import get_db
 from api.utils.success_response import success_response
 from api.v1.schemas import submission as s_schema
+from api.v1.schemas import trivia as t_schema
 
 from api.v1.services.moderator import mod_service, Moderator
 from api.v1.services.submission import submission_service
@@ -110,7 +111,7 @@ async def retrieve_single_submission_for_mods(
     response_model=s_schema.GetSubmissionForModResponseModelSchema,
     status_code=200,
 )
-async def approve_single_submission(
+async def review_single_submission(
     id: str,
     status: Literal["approved", "rejected"],
     db: Session = Depends(get_db),
@@ -133,4 +134,132 @@ async def approve_single_submission(
         status_code=200,
         message=f"Submission marked as {status}",
         data=s_schema.RetrieveSubmissionForModSchema.model_validate(subm.to_dict()),
+    )
+
+
+@submissions.get(
+    "",
+    response_model=s_schema.GetListOfSubmissionForModResponseModelSchema,
+    status_code=200,
+)
+async def retrieve_all_submissions(
+    db: Session = Depends(get_db),
+    mod: Moderator = Depends(mod_service.get_current_admin),
+):
+    """Endpoint to retrieve all submissions.
+
+    Args:
+        db (Session, optional): The db session object.
+    """
+    submissions = submission_service.fetch_all(db)
+
+    validated_s_dict = [
+        s_schema.PostSubmissionResponseSchema.model_validate(s.to_dict())
+        for s in submissions
+    ]
+
+    return success_response(
+        data=jsonable_encoder(validated_s_dict),
+        message="Successfully retrieved all submissions",
+        status_code=200,
+    )
+
+
+@submissions.delete(
+    "/{id}",
+    status_code=204,
+)
+async def delete_single_submission(
+    id: str,
+    db: Session = Depends(get_db),
+    mod: Moderator = Depends(mod_service.get_current_admin),
+):
+    """Endpoint to delete a single submission.
+
+    Args:
+        db (Session, optional): The db session object.
+    """
+    status = submission_service.delete(db=db, id=id)
+    print(status)
+
+
+@submissions.get(
+    "/stats",
+    response_model=s_schema.GetSubmissionStatsResponseModelSchema,
+    status_code=200,
+)
+async def retrieve_submissions_stats(db: Session = Depends(get_db)):
+    """Endpoint to retrieve stats for submissions.
+
+    Args:
+        db (Session, optional): The db session object.
+    """
+    stats = submission_service.fetch_submission_stats(db=db)
+
+    return success_response(
+        data=stats,
+        message="Successfully retrieved submission stats",
+        status_code=200,
+    )
+
+
+@submissions.get(
+    "/{id}/similars",
+    response_model=t_schema.GetListOfTriviaForModResponseModelSchema,
+    status_code=200,
+)
+async def retrieve_similar_questions(
+    id: str,
+    db: Session = Depends(get_db),
+    mod: Moderator = Depends(mod_service.get_current_mod),
+):
+    """Endpoint to retrieve all trivia questions that are similar to a given submission.
+
+    Args:
+        id (str): The id of the submission whose similars are to be checked for
+        db (Session): The db session object.
+        mod (Moderator): The mod making request
+    """
+    similar_trivias = submission_service.fetch_similars(db=db, id=id)
+    validated_t_dict = [
+        t_schema.RetrieveTriviaForModSchema.model_validate(t.to_dict())
+        for t in similar_trivias
+    ]
+
+    return success_response(
+        data=jsonable_encoder(validated_t_dict),
+        message="Successfully retrieved all similar trivias",
+        status_code=200,
+    )
+
+
+@submissions.get(
+    "/countries",
+    response_model=s_schema.GetListOfCountriesResponseModelSchema,
+    status_code=200,
+)
+async def retrieve_valid_countries():
+    """Endpoint to retrieve all countries present on the database."""
+    all_countries = [country.value for country in s_schema.ACE]
+
+    return success_response(
+        data=jsonable_encoder(all_countries),
+        message="Successfully retrieved all valid countries",
+        status_code=200,
+    )
+
+
+@submissions.get(
+    "/categories",
+    response_model=s_schema.GetListOfCategoriesResponseModelSchema,
+    status_code=200,
+)
+async def retrieve_valid_categories():
+    """Endpoint to retrieve all valid categories used on the database."""
+    all_categories = [category.value for category in s_schema.CategoryEnum]
+
+    return success_response(
+        data=jsonable_encoder(all_categories),
+        message="Successfully retrieved all valid categories",
+        status_code=200,
     )

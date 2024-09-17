@@ -2,9 +2,11 @@ from typing import Literal
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
+from sqlalchemy import func
 
 from api.utils.paginated_response import paginated_response
 from api.v1.models.submission import Submission, SubmissionOption
+from api.v1.models.trivia import Trivia
 from api.core.base.services import Service
 from api.v1.schemas import submission as s_schema
 from api.v1.services.country import CountryService
@@ -14,7 +16,10 @@ from api.v1.models.moderator import Moderator
 from api.v1.models.country import Country
 from api.v1.models.category import Category
 from api.utils.logger import logger
-from api.utils.sql_queries import query_for_mods_pref_submissions
+from api.utils.sql_queries import (
+    query_for_mods_pref_submissions,
+    query_for_submission_stats,
+)
 
 
 class SubmissionService(Service):
@@ -37,16 +42,38 @@ class SubmissionService(Service):
     def update(self):
         pass
 
-    def delete(self):
-        pass
+    def delete(self, db: Session, id: str) -> bool:
+        """Deletes an existing submission. Else raise a 404 if not found"""
+        try:
+            submission = self.fetch(db=db, id=id, raise_404=True)
 
-    def fetch_all():
-        pass
+            db.delete(submission)
+            db.commit()
 
-    def fetch(self, db: Session, id: str):
+            return True
+        except Exception as e:
+            logger.exception(e)
+            raise e
+
+    def fetch_all(self, db: Session) -> list[Submission]:
+        """Fetches all submissions from the database
+
+        Args:
+            db (Session): Db session object
+
+        Returns:
+            list[Submission]: A list of all Submission objects on the database
+        """
+        all_submissions = db.query(Submission).all()
+        return all_submissions
+
+    def fetch(self, db: Session, id: str, raise_404=False):
         """Fetches a submission by their id"""
 
         subm = db.get(Submission, id)
+        if subm is None and raise_404 is True:
+            raise self.NOT_FOUND_EXC
+
         return subm
 
     def extract_countries_categories_options(
@@ -205,12 +232,9 @@ class SubmissionService(Service):
     def fetch_assigned_submission(
         self, db: Session, mod_id: str, target_id: str
     ) -> Submission:
-        submission = self.fetch(db, target_id)
+        submission = self.fetch(db, target_id, raise_404=True)
 
-        if submission is None:
-            raise self.NOT_FOUND_EXC
-
-        elif submission.moderator_id != mod_id:
+        if submission.moderator_id != mod_id:
             raise self.FORBIDDEN_EXC
 
         return submission
@@ -232,6 +256,40 @@ class SubmissionService(Service):
         db.refresh(submission)
 
         return submission
+
+    def fetch_submission_stats(self, db: Session) -> dict[str, int]:
+        """This function counts the number of submissions in the db
+
+        Args:
+            db (Session): _description_
+
+        Returns:
+            dict: A dictionary containing the stats for all possible submission status.
+        """
+        query_obj = query_for_submission_stats()
+        result = db.execute(query_obj)
+
+        result_dict = result.one_or_none()
+        if result_dict is not None:
+            return result_dict._asdict()
+        return None
+
+    def fetch_similars(self, db: Session, id: str) -> list[Trivia]:
+        """This function retrieves all trivias similar to a given submission
+
+        Args:
+            db (Session): Db session object
+            id (str): Id of submission
+
+        Returns:
+            list[Trivia]: A list of trivias that are sufficiently similarity
+        """
+
+        subm = self.fetch(db=db, id=id, raise_404=True)
+        q = db.query(Trivia).where(
+            func.similarity(Trivia.question, subm.question) >= 0.6
+        )
+        return q.all()
 
 
 submission_service = SubmissionService()
