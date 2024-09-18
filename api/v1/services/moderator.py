@@ -61,16 +61,24 @@ class ModeratorService(Service):
         all_moderators = db.query(Moderator).all()
         return all_moderators
 
-    def fetch(self, db: Session, id: str):
+    def fetch(self, db: Session, id: str, raise_404=False):
         """Fetches a moderator by their id"""
 
         mod = db.get(Moderator, id)
+        
+        if mod is None and raise_404 is True:
+            raise self.NOT_FOUND_EXC
         return mod
 
-    def fetch_by_email(self, db: Session, email: EmailStr) -> Moderator | None:
+    def fetch_by_email(
+        self, db: Session, email: EmailStr, raise_404=False
+    ) -> Moderator | None:
         """Fetches a moderator by their email"""
 
         mod = db.query(Moderator).filter(Moderator.email == email).first()
+
+        if mod is None and raise_404 is True:
+            raise self.NOT_FOUND_EXC
         return mod
 
     def create(
