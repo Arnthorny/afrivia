@@ -22,7 +22,7 @@ class SubmissionStatusEnum(str, Enum):
 class CategoryEnum(str, Enum):
     entertainment = "Entertainment"
     sports = "Sports"
-    general_knowledge = "General Knowledge"
+    general_knowledge = "General-Knowledge"
     science = "Science"
     mythology = "Mythology"
     geography = "Geography"
@@ -33,7 +33,7 @@ class CategoryEnum(str, Enum):
     animals = "Animals"
     folklore = "Folklore"
     language = "Language"
-    food_drinks = "Food and Drinks"
+    food_drinks = "Food-and-Drinks"
 
 
 class SubmissionBaseSchema(BaseModel):

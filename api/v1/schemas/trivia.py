@@ -12,9 +12,12 @@ class TriviaBaseSchema(BaseModel):
     difficulty: DifficultyEnum
 
 
-class CreateTriviaSchema(TriviaBaseSchema):
+class HelperSchemaTwo(TriviaBaseSchema):
     category: CategoryEnum
     countries: list[ACE] = Field(default=[])
+
+
+class CreateTriviaSchema(HelperSchemaTwo):
     submission_id: str | None = Field(min_length=36, max_length=36, default=None)
 
 
@@ -45,3 +48,7 @@ class GetTriviaForModResponseModelSchema(BaseSuccessResponseSchema):
 
 class GetListOfTriviaForModResponseModelSchema(BaseSuccessResponseSchema):
     data: list[RetrieveTriviaForModSchema]
+
+
+class GetListOfTriviaUsersResponseModelSchema(BaseSuccessResponseSchema):
+    data: list[HelperSchemaTwo] | None
