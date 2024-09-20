@@ -233,17 +233,21 @@ class TriviaService(Service):
         trivia questions from the database.
 
         Args:
-            filter_obj (dict): A dictrionary describing how the results should be filtred
+            filter_obj (dict): A dictionary describing how the results should be filtred
             limit (int): The number of items to be retrieced
 
         Returns:
             list[Trivia]: A list of retrieved trivia objects
         """
-        if (tmp := filter_obj.pop("category_name", None)) is not None:
-            filter_obj["category_name"] = Category.name == tmp
+        if (tmp := filter_obj.pop("category", None)) is not None:
+            filter_obj["category"] = Category.name == tmp
 
         if (tmp := filter_obj.pop("difficulty", None)) is not None:
             filter_obj["difficulty"] = Trivia.difficulty == tmp
+
+        # Pop if value is None. Add back otherwise
+        if (tmp := filter_obj.pop("country", None)) is not None:
+            filter_obj["country"] = tmp
 
         stmt = query_for_question_retrieval(filters=filter_obj, limit=limit)
         results = db.scalars(stmt).all()

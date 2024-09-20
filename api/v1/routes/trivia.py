@@ -158,9 +158,13 @@ async def get_questions(
     db: Session = Depends(get_db),
 ):
     filter_obj = {
-        "category_name": category.value if category is not None else None,
-        "country": country.value if country is not None else None,
-        "difficulty": difficulty.value if difficulty is not None else None,
+        k: v
+        for (k, v) in {
+            "category": category.value if category is not None else None,
+            "country": country.value if country is not None else None,
+            "difficulty": difficulty.value if difficulty is not None else None,
+        }.items()
+        if v is not None
     }
 
     all_questions = trivia_service.retrieve_questions(db, filter_obj, amount)
@@ -170,11 +174,9 @@ async def get_questions(
             status_code=200, message="Not enough questions in database"
         )
 
-    all_question_schemas = [
-        t_schema.HelperSchemaTwo(**q.to_dict()) for q in all_questions
-    ]
-    return success_response(
-        status_code=200,
-        message="Successfully retrieved questions",
-        data=all_question_schemas,
+    all_question_d = [q.to_dict() for q in all_questions]
+
+    # Return pydantic model for automatic data filtering
+    return t_schema.GetListOfTriviaForModResponseModelSchema(
+        success=True, message="Successfully retrieved questions", data=all_question_d
     )

@@ -109,7 +109,7 @@ def query_for_question_retrieval(
         .join(Category, catr_alias.c.category_id == Category.id, isouter=True)
         .join(cntriv_alias, cntriv_alias.c.trivia_id == Trivia.id, isouter=True)
         .join(Country, cntriv_alias.c.country_id == Country.id, isouter=True)
-        .filter(filters.pop("category_name", true()), filters.pop("difficulty", true()))
+        .filter(filters.pop("category", true()), filters.pop("difficulty", true()))
         .group_by(Trivia.id, Category.name)
         .having(or_(filters.pop("country", true()), countries_arr == []))
         .limit(limit)
