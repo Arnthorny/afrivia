@@ -1,7 +1,7 @@
 INSERT INTO categories(name) VALUES
  ('Entertainment'),
  ('Sports'),
- ('General Knowledge'),
+ ('General-Knowledge'),
  ('Science'),
  ('Mythology'),
  ('Geography'),
@@ -12,4 +12,4 @@ INSERT INTO categories(name) VALUES
  ('Animals'),
  ('Folklore'),
  ('Language'),
- ('Food and Drinks');
+ ('Food-and-Drinks');

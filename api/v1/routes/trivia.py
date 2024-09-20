@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, Query
 from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
+from typing import Annotated
 
 from api.db.database import get_db
-from api.utils.success_response import success_response
+from api.utils.success_response import success_response, failure_response
 from api.v1.schemas import trivia as t_schema
 
 from api.v1.services.moderator import mod_service, Moderator
@@ -11,6 +13,7 @@ from api.v1.services.trivia import trivia_service
 from api.utils.logger import logger
 
 trivias = APIRouter(prefix="/trivias", tags=["Trivias"])
+questions = APIRouter(prefix="/questions", tags=["Questions"])
 
 
 @trivias.post(
@@ -140,3 +143,38 @@ async def delete_single_trivia(
         db (Session, optional): The db session object.
     """
     status = trivia_service.delete(db=db, id=id)
+
+
+@questions.get(
+    "",
+    status_code=200,
+    response_model=t_schema.GetListOfTriviaUsersResponseModelSchema,
+)
+async def get_questions(
+    category: t_schema.CategoryEnum | None = None,
+    country: t_schema.ACE | None = None,
+    difficulty: t_schema.DifficultyEnum | None = None,
+    amount: Annotated[int | None, Query(le=20, gt=0)] = 1,
+    db: Session = Depends(get_db),
+):
+    filter_obj = {
+        "category_name": category.value if category is not None else None,
+        "country": country.value if country is not None else None,
+        "difficulty": difficulty.value if difficulty is not None else None,
+    }
+
+    all_questions = trivia_service.retrieve_questions(db, filter_obj, amount)
+
+    if len(all_questions) != amount:
+        return failure_response(
+            status_code=200, message="Not enough questions in database"
+        )
+
+    all_question_schemas = [
+        t_schema.HelperSchemaTwo(**q.to_dict()) for q in all_questions
+    ]
+    return success_response(
+        status_code=200,
+        message="Successfully retrieved questions",
+        data=all_question_schemas,
+    )

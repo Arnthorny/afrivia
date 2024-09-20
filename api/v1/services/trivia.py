@@ -13,6 +13,7 @@ from api.v1.services.category import CategoryService
 from api.v1.models.country import Country
 from api.v1.models.category import Category
 from api.utils.logger import logger
+from api.utils.sql_queries import query_for_question_retrieval
 
 
 class TriviaService(Service):
@@ -224,6 +225,30 @@ class TriviaService(Service):
         except Exception as e:
             logger.exception(e)
             raise e
+
+    def retrieve_questions(
+        self, db: Session, filter_obj: dict[str, str | None], limit: int
+    ) -> list[Trivia]:
+        """This function uses an already prepared sqlalchemy select statement to retrieve
+        trivia questions from the database.
+
+        Args:
+            filter_obj (dict): A dictrionary describing how the results should be filtred
+            limit (int): The number of items to be retrieced
+
+        Returns:
+            list[Trivia]: A list of retrieved trivia objects
+        """
+        if (tmp := filter_obj.pop("category_name", None)) is not None:
+            filter_obj["category_name"] = Category.name == tmp
+
+        if (tmp := filter_obj.pop("difficulty", None)) is not None:
+            filter_obj["difficulty"] = Trivia.difficulty == tmp
+
+        stmt = query_for_question_retrieval(filters=filter_obj, limit=limit)
+        results = db.scalars(stmt).all()
+
+        return results
 
 
 trivia_service = TriviaService()
