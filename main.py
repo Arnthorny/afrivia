@@ -17,13 +17,13 @@ from api.utils.settings import settings
 
 app = FastAPI(title="Afrivia API")
 
+https_only = settings.PYTHON_ENV == 'prod'
 
-# TODO Is this useful?
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.SECRET_KEY,
-    same_site="none",
-    https_only=False,
+    same_site="lax",
+    https_only=https_only,
     max_age=settings.JWT_REFRESH_EXPIRY * 24 * 60 * 60,
 )
 

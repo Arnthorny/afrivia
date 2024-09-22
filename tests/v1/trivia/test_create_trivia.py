@@ -44,7 +44,7 @@ test_triv_req_body_1 = {
     "incorrect_options": ["Lil Wayne", "George Bush", "Barack Obama"],
     "correct_option": "Abdelmadjid Tebboune",
     "difficulty": "easy",
-    "category": "General Knowledge",
+    "category": "General-Knowledge",
     "countries": ["Algeria"],
 }
 
@@ -82,7 +82,7 @@ class TestCreateTrivia:
 
             return [
                 [Country(name="Algeria")],
-                [Category(name="General Knowledge")],
+                [Category(name="General-Knowledge")],
                 [
                     TriviaOption(content=all_options[0]),
                     TriviaOption(content=all_options[1]),
@@ -143,7 +143,7 @@ class TestCreateTrivia:
             "question": "",
             "incorrect_options": ["Lil Wayne", "George Bush", "Barack Obama"],
             "correct_option": "Abdelmadjid Tebboune",
-            "category": "General Knowledge",
+            "category": "General-Knowledge",
             "countries": "Algeria",  # Should be a list of countries
         }
 

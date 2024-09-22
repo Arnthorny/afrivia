@@ -46,7 +46,7 @@ test_sub_req_body_1 = {
     "incorrect_options": ["Lil Wayne", "George Bush", "Barack Obama"],
     "correct_option": "Abdelmadjid Tebboune",
     "difficulty": "easy",
-    "category": "General Knowledge",
+    "category": "General-Knowledge",
     "countries": ["Algeria"],
 }
 
@@ -82,7 +82,7 @@ class TestCreateSubmission:
 
             return [
                 [Country(name="Algeria")],
-                [Category(name="General Knowledge")],
+                [Category(name="General-Knowledge")],
                 [
                     SubmissionOption(content=all_options[0]),
                     SubmissionOption(content=all_options[1]),
@@ -149,7 +149,7 @@ class TestCreateSubmission:
             "incorrect_options": ["Lil Wayne", "George Bush", "Barack Obama"],
             "correct_option": "Abdelmadjid Tebboune",
             "difficulty": "not that bad",  # Should be a member of an enum
-            "category": "General Knowledge",
+            "category": "General-Knowledge",
             "countries": "Algeria",  # Should be a list of countries
         }
 

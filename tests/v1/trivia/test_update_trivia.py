@@ -62,7 +62,7 @@ def client():
 
 test_triv_body_1 = {
     "question": "Who was the first president of Algeria?",
-    "category": "General Knowledge",
+    "category": "General-Knowledge",
     "countries": ["Nigeria"],
 }
 
