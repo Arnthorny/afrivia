@@ -29,11 +29,31 @@ app.add_middleware(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.APP_URL],
+    allow_origins=['*'],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+routes_with_credentials = [
+    "/api/v1/auth/login",
+    "/api/v1/auth/register",
+    "/api/v1/auth/register-admin",
+    "/api/v1/auth/refresh-token"
+    "/api/v1/auth/logout"
+]
+
+# Apply CORS middleware to specific routes
+@app.middleware("http")
+async def cors_middleware(request, call_next):
+    response = await call_next(request)
+
+    # Check the request path and apply CORS middleware accordingly
+    if request.url.path in routes_with_credentials:
+        response.headers["Access-Control-Allow-Origin"] = settings.APP_URL
+
+    return response
+
 
 app.include_router(api_version_one)
 
