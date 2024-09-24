@@ -45,7 +45,7 @@ def query_for_mods_pref_submissions() -> Select:
         select(
             Moderator.id,
             func.array_remove(
-                func.array_agg(func.distinct(subquery_1.c.name)), None
+                func.array_agg(func.distinct(subquery_1.c.c_name)), None
             ).label("country_preferences"),
             func.count(func.distinct(subquery_2.c.id)).label(
                 "assigned_submissions_count"
@@ -55,7 +55,7 @@ def query_for_mods_pref_submissions() -> Select:
         .outerjoin(subquery_1, subquery_1.c.moderator_id == Moderator.id)
         .outerjoin(subquery_2, subquery_2.c.moderator_id == Moderator.id)
         .group_by(Moderator.id)
-        .order_by(asc("pending_submissions_count"))
+        .order_by(asc("assigned_submissions_count"))
     )
 
     return query
