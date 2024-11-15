@@ -19,7 +19,7 @@ A Trivia API Service tailored to an african audience.
 
 ## Description
 
-Afrivia is an API service built for the purpose of collecting and reviewing trivia questions on topics strictly related to the african continent.
+Afrivia is an API service built for the purpose of collecting and reviewing trivia questions on topics strictly related to the african continent. The MVP for Afrivia is currently hosted [here](https://www.afrivia.me/)
 
 ## Features
 
