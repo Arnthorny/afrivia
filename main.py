@@ -22,7 +22,7 @@ https_only = settings.PYTHON_ENV == "prod"
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.SECRET_KEY,
-    same_site="lax",
+    same_site="strict" if https_only else "lax",
     https_only=https_only,
     max_age=settings.JWT_REFRESH_EXPIRY * 24 * 60 * 60,
 )
